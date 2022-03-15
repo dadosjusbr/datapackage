@@ -3,17 +3,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 
 	"github.com/dadosjusbr/proto/coleta"
 	"github.com/dadosjusbr/coletores/status"
 	"github.com/frictionlessdata/datapackage-go/datapackage"
-	"github.com/gocarina/gocsv"
 )
 
 // Adicionar os scores a struct de Metadados existente 
-func BuilderCSV(rc *coleta.ResultadoColeta, score []float32) *ResultadoColeta_CSV {
+func NewColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
     var coleta Coleta_CSV
 	var remuneracoes []*Remuneracao_CSV
 	var folha []*ContraCheque_CSV
@@ -77,8 +75,8 @@ func BuilderCSV(rc *coleta.ResultadoColeta, score []float32) *ResultadoColeta_CS
 }
 
 // Atualiza o datapackage_descriptor e compacta novamente
-func Write(outputPath, orgao string, ano, mes int) {
-	c, err := ioutil.ReadFile("./datapackage_descriptor.json")
+func Zip(packageFileName, outputPath, zipFileName string) {
+	c, err := ioutil.ReadFile(packageFileName)
 	if err != nil {
 		err = status.NewError(status.InvalidParameters, fmt.Errorf("error reading datapackge_descriptor.json:%q", err))
 		status.ExitFromError(err)
@@ -97,7 +95,7 @@ func Write(outputPath, orgao string, ano, mes int) {
 	}
 
 	// Packing CSV and package descriptor.
-	zipName := filepath.Join(outputPath, fmt.Sprintf("%s-%d-%d.zip", orgao, ano, mes))
+	zipName := filepath.Join(outputPath, fmt.Sprintf("%s.zip", zipFileName))
 	if err := pkg.Zip(zipName); err != nil {
 		err = status.NewError(status.SystemError, fmt.Errorf("error zipping datapackage (%s):%q", zipName, err))
 		status.ExitFromError(err)
@@ -113,14 +111,4 @@ func Load(path string) {
 	}
 
     fmt.Printf("Data package \"%s\" successfully created.\n", pkg.Descriptor()["name"])
-}
-
-// ToCSVFile dumps the payroll into a file using the CSV format.
-func ToCSVFile(in interface{}, path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("error creating CSV file(%s):%q", path, err)
-	}
-	defer f.Close()
-	return gocsv.MarshalFile(in, f)
 }
