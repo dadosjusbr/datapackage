@@ -3,97 +3,82 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"io"
 	"os"
 	"path/filepath"
-	"archive/zip"
-	"strings"
 
+	"github.com/dadosjusbr/proto/coleta"
 	"github.com/dadosjusbr/coletores/status"
 	"github.com/frictionlessdata/datapackage-go/datapackage"
 	"github.com/gocarina/gocsv"
 )
 
-// Descompactar o package
-// Fonte: https://stackoverflow.com/questions/20357223/easy-way-to-unzip-file-with-golang
-func Unzip(src, dest string) error {
-    r, err := zip.OpenReader(src)
-    if err != nil {
-        return err
-    }
-    defer func() {
-        if err := r.Close(); err != nil {
-            panic(err)
-        }
-    }()
+// Adicionar os scores a struct de Metadados existente 
+func BuilderCSV(rc *coleta.ResultadoColeta, score []float32) *ResultadoColeta_CSV {
+    var coleta Coleta_CSV
+	var remuneracoes []*Remuneracao_CSV
+	var folha []*ContraCheque_CSV
 
-    os.MkdirAll(dest, 0755)
+	coleta.ChaveColeta = rc.Coleta.ChaveColeta
+	coleta.Orgao = rc.Coleta.Orgao
+	coleta.Mes = rc.Coleta.Mes
+	coleta.Ano = rc.Coleta.Ano
+	coleta.TimestampColeta = rc.Coleta.TimestampColeta.AsTime()
+	coleta.RepositorioColetor = rc.Coleta.RepositorioColetor
+	coleta.VersaoColetor = rc.Coleta.VersaoColetor
+	coleta.DirColetor = rc.Coleta.DirColetor
 
-    // Closure to address file descriptors issue with all the deferred .Close() methods
-    extractAndWriteFile := func(f *zip.File) error {
-        rc, err := f.Open()
-        if err != nil {
-            return err
-        }
-        defer func() {
-            if err := rc.Close(); err != nil {
-                panic(err)
-            }
-        }()
+	var metadados Metadados_CSV
+	metadados.ChaveColeta = rc.Coleta.ChaveColeta
+	metadados.NaoRequerLogin = rc.Metadados.NaoRequerLogin
+	metadados.NaoRequerCaptcha = rc.Metadados.NaoRequerCaptcha
+	metadados.Acesso = rc.Metadados.Acesso.String()
+	metadados.Extensao = rc.Metadados.Extensao.String()
+	metadados.EstritamenteTabular = rc.Metadados.EstritamenteTabular
+	metadados.FormatoConsistente = rc.Metadados.FormatoConsistente
+	metadados.TemMatricula = rc.Metadados.TemMatricula
+	metadados.TemLotacao = rc.Metadados.TemLotacao
+	metadados.TemCargo = rc.Metadados.TemCargo
+	metadados.DetalhamentoReceitaBase = rc.Metadados.ReceitaBase.String()
+	metadados.DetalhamentoOutrasReceitas = rc.Metadados.OutrasReceitas.String()
+	metadados.DetalhamentoDescontos = rc.Metadados.Despesas.String()
+	metadados.IndiceCompletude = rc.Metadados.IndiceCompletude
+	metadados.IndiceFacilidade = rc.Metadados.IndiceFacilidade
+	metadados.IndiceTransparencia = rc.Metadados.IndiceTransparencia
 
-        path := filepath.Join(dest, f.Name)
+	for _, v := range rc.Folha.ContraCheque {
+		var contraCheque ContraCheque_CSV
+		contraCheque.IdContraCheque = v.IdContraCheque
+		contraCheque.ChaveColeta = v.ChaveColeta
+		contraCheque.Nome = v.Nome
+		contraCheque.Matricula = v.Matricula
+		contraCheque.Funcao = v.Funcao
+		contraCheque.Ativo = v.Ativo
+		contraCheque.LocalTrabalho = v.LocalTrabalho
+		contraCheque.Tipo = v.Tipo.String()
+		for _, k := range v.Remuneracoes.Remuneracao {
+			var remuneracao Remuneracao_CSV
+			remuneracao.IdContraCheque = v.IdContraCheque
+			remuneracao.ChaveColeta = v.ChaveColeta
+			remuneracao.Natureza = k.Natureza.String()
+			remuneracao.Categoria = k.Categoria
+			remuneracao.Item = k.Item
+			remuneracao.Valor = k.Valor
+			remuneracoes = append(remuneracoes, &remuneracao)
+		}
+		folha = append(folha, &contraCheque)
+	}
 
-        // Check for ZipSlip (Directory traversal)
-        if !strings.HasPrefix(path, filepath.Clean(dest) + string(os.PathSeparator)) {
-            return fmt.Errorf("illegal file path: %s", path)
-        }
-
-        if f.FileInfo().IsDir() {
-            os.MkdirAll(path, f.Mode())
-        } else {
-            os.MkdirAll(filepath.Dir(path), f.Mode())
-            f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-            if err != nil {
-                return err
-            }
-            defer func() {
-                if err := f.Close(); err != nil {
-                    panic(err)
-                }
-            }()
-
-            _, err = io.Copy(f, rc)
-            if err != nil {
-                return err
-            }
-        }
-        return nil
-    }
-
-    for _, f := range r.File {
-        err := extractAndWriteFile(f)
-        if err != nil {
-            return err
-        }
-    }
-
-    return nil
-}
-
-// Adicionar os scores a struct de Metadados existente
-// Ainda em duvida de qual é a melhor maneira de passar os scores via parametro 
-func ScoreToCSV(coleta Metadados_CSV, score []float32) *Metadados_CSV {
-
-	coleta.IndiceTransparencia = score[0]
-	coleta.IndiceCompletude = score[1]
-	coleta.IndiceFacilidade = score[2]
-	
-	return &coleta
+	return &ResultadoColeta_CSV{
+		Coleta:       append([]*Coleta_CSV{}, &coleta),
+		Remuneracoes: remuneracoes,
+		Folha:        folha,
+		Metadados:    append([]*Metadados_CSV{}, &metadados),
+	}
 }
 
 // Atualiza o datapackage_descriptor e compacta novamente
-func RewritePackageDescriptor(packageFileName, outputPath, orgao string, ano, mes int) {
-	c, err := ioutil.ReadFile(packageFileName)
+func Write(outputPath, orgao string, ano, mes int) {
+	c, err := ioutil.ReadFile("./datapackage_descriptor.json")
 	if err != nil {
 		err = status.NewError(status.InvalidParameters, fmt.Errorf("error reading datapackge_descriptor.json:%q", err))
 		status.ExitFromError(err)
@@ -117,6 +102,17 @@ func RewritePackageDescriptor(packageFileName, outputPath, orgao string, ano, me
 		err = status.NewError(status.SystemError, fmt.Errorf("error zipping datapackage (%s):%q", zipName, err))
 		status.ExitFromError(err)
 	}
+}
+
+func Load(path string) {
+    pkg, err := datapackage.Load(path)
+
+    if err != nil {
+		err = status.NewError(status.SystemError, fmt.Errorf("error loading datapackage (%s):%q", path, err))
+		status.ExitFromError(err)
+	}
+
+    fmt.Printf("Data package \"%s\" successfully created.\n", pkg.Descriptor()["name"])
 }
 
 // ToCSVFile dumps the payroll into a file using the CSV format.
