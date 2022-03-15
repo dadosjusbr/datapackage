@@ -11,7 +11,7 @@ import (
 )
 
 // Adicionar os scores a struct de Metadados existente 
-func NewColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
+func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
     var coleta Coleta_CSV
 	var remuneracoes []*Remuneracao_CSV
 	var folha []*ContraCheque_CSV
