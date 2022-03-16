@@ -1,18 +1,30 @@
 package datapackage
+
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
-	"github.com/dadosjusbr/proto/coleta"
 	"github.com/dadosjusbr/coletores/status"
+	"github.com/dadosjusbr/proto/coleta"
 	"github.com/frictionlessdata/datapackage-go/datapackage"
+	"github.com/frictionlessdata/tableschema-go/csv"
+	"github.com/gocarina/gocsv"
 )
 
-// Adicionar os scores a struct de Metadados existente 
+const (
+	coletaFileName      = "coleta.csv"                  // hardcoded in datapackage_descriptor.json
+	folhaFileName       = "contra_cheque.csv"           // hardcoded in datapackage_descriptor.json
+	remuneracaoFileName = "remuneracao.csv"             // hardcoded in datapackage_descriptor.json
+	metadadosFileName   = "metadados.csv"               // hardcoded in datapackage_descriptor.json
+	packageFileName     = "datapackage_descriptor.json" // name of datapackage descriptor
+)
+
+
 func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
-    var coleta Coleta_CSV
+	var coleta Coleta_CSV
 	var remuneracoes []*Remuneracao_CSV
 	var folha []*ContraCheque_CSV
 
@@ -74,8 +86,31 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
 	}
 }
 
-// Atualiza o datapackage_descriptor e compacta novamente
-func Zip(packageFileName, outputPath, zipFileName string) {
+
+func Zip(path string, rc *ResultadoColeta_CSV) *ResultadoColeta_CSV {
+	// Creating coleta csv
+	if err := toCSVFile(rc.Coleta, coletaFileName); err != nil {
+		status.ExitFromError(err)
+	}
+
+	// Creating contracheque csv
+	if err := toCSVFile(rc.Folha, folhaFileName); err != nil {
+		err = status.NewError(status.InvalidParameters, fmt.Errorf("error creating Folha de pagamento CSV:%q", err))
+		status.ExitFromError(err)
+	}
+
+	// Creating remuneracao csv
+	if err := toCSVFile(rc.Remuneracoes, remuneracaoFileName); err != nil {
+		err = status.NewError(status.InvalidParameters, fmt.Errorf("error creating Remuneração CSV:%q", err))
+		status.ExitFromError(err)
+	}
+
+	// Creating metadata csv
+	if err := toCSVFile(rc.Metadados, metadadosFileName); err != nil {
+		err = status.NewError(status.InvalidParameters, fmt.Errorf("error creating Metadados CSV:%q", err))
+		status.ExitFromError(err)
+	}
+
 	c, err := ioutil.ReadFile(packageFileName)
 	if err != nil {
 		err = status.NewError(status.InvalidParameters, fmt.Errorf("error reading datapackge_descriptor.json:%q", err))
@@ -95,20 +130,55 @@ func Zip(packageFileName, outputPath, zipFileName string) {
 	}
 
 	// Packing CSV and package descriptor.
-	zipName := filepath.Join(outputPath, fmt.Sprintf("%s.zip", zipFileName))
+	zipName := filepath.Join(path)
 	if err := pkg.Zip(zipName); err != nil {
 		err = status.NewError(status.SystemError, fmt.Errorf("error zipping datapackage (%s):%q", zipName, err))
 		status.ExitFromError(err)
 	}
+
+	return rc
 }
 
-func Load(path string) {
-    pkg, err := datapackage.Load(path)
+func Load(path string) ResultadoColeta_CSV {
+	pkg, err := datapackage.Load(path)
 
-    if err != nil {
+	if err != nil {
 		err = status.NewError(status.SystemError, fmt.Errorf("error loading datapackage (%s):%q", path, err))
 		status.ExitFromError(err)
 	}
 
-    fmt.Printf("Data package \"%s\" successfully created.\n", pkg.Descriptor()["name"])
+	fmt.Printf("Data package \"%s\" successfully created.\n", pkg.Descriptor()["name"])
+
+	coleta := pkg.GetResource("coleta")
+	var coleta_CSV []*Coleta_CSV
+	coleta.Cast(&coleta_CSV, csv.LoadHeaders())
+
+	contracheque := pkg.GetResource("contracheque")
+	var contracheque_CSV []*ContraCheque_CSV
+	contracheque.Cast(&contracheque_CSV, csv.LoadHeaders())
+
+	remuneracao := pkg.GetResource("remuneracao")
+	var remuneracao_CSV []*Remuneracao_CSV
+	remuneracao.Cast(&remuneracao_CSV, csv.LoadHeaders())
+
+	metadados := pkg.GetResource("metadados")
+	var metadados_CSV []*Metadados_CSV
+	metadados.Cast(&metadados_CSV, csv.LoadHeaders())
+
+	return ResultadoColeta_CSV{
+		Coleta:       coleta_CSV,
+		Remuneracoes: remuneracao_CSV,
+		Folha:        contracheque_CSV,
+		Metadados:    metadados_CSV,
+	}
+}
+
+// ToCSVFile dumps the payroll into a file using the CSV format.
+func toCSVFile(in interface{}, path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("error creating CSV file(%s):%q", path, err)
+	}
+	defer f.Close()
+	return gocsv.MarshalFile(in, f)
 }
