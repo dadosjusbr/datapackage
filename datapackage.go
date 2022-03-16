@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dadosjusbr/coletores/status"
 	"github.com/dadosjusbr/proto/coleta"
 	"github.com/frictionlessdata/datapackage-go/datapackage"
 	"github.com/frictionlessdata/tableschema-go/csv"
@@ -21,7 +20,6 @@ const (
 	metadadosFileName   = "metadados.csv"               // hardcoded in datapackage_descriptor.json
 	packageFileName     = "datapackage_descriptor.json" // name of datapackage descriptor
 )
-
 
 func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
 	var coleta Coleta_CSV
@@ -86,91 +84,103 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
 	}
 }
 
-
-func Zip(path string, rc *ResultadoColeta_CSV) *ResultadoColeta_CSV {
+func Zip(path string, rc *ResultadoColeta_CSV) error {
 	// Creating coleta csv
 	if err := toCSVFile(rc.Coleta, coletaFileName); err != nil {
-		status.ExitFromError(err)
+		return fmt.Errorf("error creating Coleta CSV:%q", err)
 	}
 
 	// Creating contracheque csv
 	if err := toCSVFile(rc.Folha, folhaFileName); err != nil {
-		err = status.NewError(status.InvalidParameters, fmt.Errorf("error creating Folha de pagamento CSV:%q", err))
-		status.ExitFromError(err)
+		return fmt.Errorf("error creating Folha de pagamento CSV:%q", err)
 	}
 
 	// Creating remuneracao csv
 	if err := toCSVFile(rc.Remuneracoes, remuneracaoFileName); err != nil {
-		err = status.NewError(status.InvalidParameters, fmt.Errorf("error creating Remuneração CSV:%q", err))
-		status.ExitFromError(err)
+		return fmt.Errorf("error creating Remuneração CSV:%q", err)
 	}
 
 	// Creating metadata csv
 	if err := toCSVFile(rc.Metadados, metadadosFileName); err != nil {
-		err = status.NewError(status.InvalidParameters, fmt.Errorf("error creating Metadados CSV:%q", err))
-		status.ExitFromError(err)
+		return fmt.Errorf("error creating Metadados CSV:%q", err)
 	}
 
 	c, err := ioutil.ReadFile(packageFileName)
 	if err != nil {
-		err = status.NewError(status.InvalidParameters, fmt.Errorf("error reading datapackge_descriptor.json:%q", err))
-		status.ExitFromError(err)
+		return fmt.Errorf("error reading datapackge_descriptor.json:%q", err)
 	}
 
 	var desc map[string]interface{}
 	if err := json.Unmarshal(c, &desc); err != nil {
-		err = status.NewError(status.InvalidParameters, fmt.Errorf("error unmarshaling datapackage descriptor:%q", err))
-		status.ExitFromError(err)
+		return fmt.Errorf("error unmarshaling datapackage descriptor:%q", err)
 	}
 
 	pkg, err := datapackage.New(desc, ".")
 	if err != nil {
-		err = status.NewError(status.InvalidParameters, fmt.Errorf("error create datapackage:%q", err))
-		status.ExitFromError(err)
+		return fmt.Errorf("error create datapackage:%q", err)
 	}
 
 	// Packing CSV and package descriptor.
 	zipName := filepath.Join(path)
 	if err := pkg.Zip(zipName); err != nil {
-		err = status.NewError(status.SystemError, fmt.Errorf("error zipping datapackage (%s):%q", zipName, err))
-		status.ExitFromError(err)
+		return fmt.Errorf("error zipping datapackage (%s):%q", zipName, err)
 	}
 
-	return rc
+	return err
 }
 
-func Load(path string) ResultadoColeta_CSV {
+func Load(path string) (ResultadoColeta_CSV, error) {
 	pkg, err := datapackage.Load(path)
+	var rc ResultadoColeta_CSV
 
 	if err != nil {
-		err = status.NewError(status.SystemError, fmt.Errorf("error loading datapackage (%s):%q", path, err))
-		status.ExitFromError(err)
+		return rc, fmt.Errorf("error loading datapackage (%s):%q", path, err)
 	}
 
 	fmt.Printf("Data package \"%s\" successfully created.\n", pkg.Descriptor()["name"])
 
 	coleta := pkg.GetResource("coleta")
+	if coleta == nil {
+		return rc, fmt.Errorf("error loading coleta resource")
+	}
 	var coleta_CSV []*Coleta_CSV
-	coleta.Cast(&coleta_CSV, csv.LoadHeaders())
+	if err := coleta.Cast(&coleta_CSV, csv.LoadHeaders()); err != nil {
+		return rc, fmt.Errorf("failed to cast Coleta_CSV: %s", err)
+	}
 
 	contracheque := pkg.GetResource("contracheque")
+	if contracheque == nil {
+		return rc, fmt.Errorf("error loading contracheque resource")
+	}
 	var contracheque_CSV []*ContraCheque_CSV
-	contracheque.Cast(&contracheque_CSV, csv.LoadHeaders())
+	if err := contracheque.Cast(&contracheque_CSV, csv.LoadHeaders()); err != nil {
+		return rc, fmt.Errorf("failed to cast ContraCheque_CSV: %s", err)
+	}
 
 	remuneracao := pkg.GetResource("remuneracao")
+	if remuneracao == nil {
+		return rc, fmt.Errorf("error loading remuneracao resource")
+	}
 	var remuneracao_CSV []*Remuneracao_CSV
-	remuneracao.Cast(&remuneracao_CSV, csv.LoadHeaders())
+	if err := remuneracao.Cast(&remuneracao_CSV, csv.LoadHeaders()); err != nil {
+		return rc, fmt.Errorf("failed to cast Remuneracao_CSV: %s", err)
+	}
 
 	metadados := pkg.GetResource("metadados")
+	if metadados == nil {
+		return rc, fmt.Errorf("error loading metadados resource")
+	}
 	var metadados_CSV []*Metadados_CSV
-	metadados.Cast(&metadados_CSV, csv.LoadHeaders())
+	if err := metadados.Cast(&metadados_CSV, csv.LoadHeaders()); err != nil {
+		return rc, fmt.Errorf("failed to cast Metadados_CSV: %s", err)
+	}
 
 	return ResultadoColeta_CSV{
 		Coleta:       coleta_CSV,
 		Remuneracoes: remuneracao_CSV,
 		Folha:        contracheque_CSV,
 		Metadados:    metadados_CSV,
-	}
+	}, err
 }
 
 // ToCSVFile dumps the payroll into a file using the CSV format.
