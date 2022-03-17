@@ -168,7 +168,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 
 	metadados := pkg.GetResource("metadados")
 	if metadados == nil {
-		return rc, fmt.Errorf("error loading metadados resource")
+		return rc, fmt.Errorf("resource metadados not found in package %s", path)
 	}
 	var metadados_CSV []*Metadados_CSV
 	if err := metadados.Cast(&metadados_CSV, csv.LoadHeaders()); err != nil {
