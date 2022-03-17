@@ -141,7 +141,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 
 	coleta := pkg.GetResource("coleta")
 	if coleta == nil {
-		return rc, fmt.Errorf("error loading coleta resource")
+		return rc, fmt.Errorf("resource coleta not found in package %s", path)
 	}
 	var coleta_CSV []*Coleta_CSV
 	if err := coleta.Cast(&coleta_CSV, csv.LoadHeaders()); err != nil {
