@@ -159,7 +159,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 
 	remuneracao := pkg.GetResource("remuneracao")
 	if remuneracao == nil {
-		return rc, fmt.Errorf("error loading remuneracao resource")
+		return rc, fmt.Errorf("resource remuneracao not found in package %s", path)
 	}
 	var remuneracao_CSV []*Remuneracao_CSV
 	if err := remuneracao.Cast(&remuneracao_CSV, csv.LoadHeaders()); err != nil {
