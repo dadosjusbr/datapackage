@@ -14,11 +14,15 @@ import (
 )
 
 const (
-	coletaFileName      = "coleta.csv"                  // hardcoded in datapackage_descriptor.json
-	folhaFileName       = "contra_cheque.csv"           // hardcoded in datapackage_descriptor.json
-	remuneracaoFileName = "remuneracao.csv"             // hardcoded in datapackage_descriptor.json
-	metadadosFileName   = "metadados.csv"               // hardcoded in datapackage_descriptor.json
-	packageFileName     = "datapackage_descriptor.json" // name of datapackage descriptor
+	coletaFileName       = "coleta.csv"                  // hardcoded in datapackage_descriptor.json
+	folhaFileName        = "contra_cheque.csv"           // hardcoded in datapackage_descriptor.json
+	remuneracaoFileName  = "remuneracao.csv"             // hardcoded in datapackage_descriptor.json
+	metadadosFileName    = "metadados.csv"               // hardcoded in datapackage_descriptor.json
+	packageFileName      = "datapackage_descriptor.json" // name of datapackage descriptor
+	coletaResource		 = "coleta" 					 // hardcoded in datapackage_descriptor.json
+	contrachequeResource = "contracheque"				 // hardcoded in datapackage_descriptor.json
+	remuneracaoResource  = "remuneracao"				 // hardcoded in datapackage_descriptor.json
+	metadadosResource    = "metadados"					 // hardcoded in datapackage_descriptor.json
 )
 
 func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
@@ -137,9 +141,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return rc, fmt.Errorf("error loading datapackage (%s):%q", path, err)
 	}
 
-	fmt.Printf("Data package \"%s\" successfully created.\n", pkg.Descriptor()["name"])
-
-	coleta := pkg.GetResource("coleta")
+	coleta := pkg.GetResource(coletaResource)
 	if coleta == nil {
 		return rc, fmt.Errorf("resource coleta not found in package %s", path)
 	}
@@ -148,7 +150,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return rc, fmt.Errorf("failed to cast Coleta_CSV: %s", err)
 	}
 
-	contracheque := pkg.GetResource("contracheque")
+	contracheque := pkg.GetResource(contrachequeResource)
 	if contracheque == nil {
 		return rc, fmt.Errorf("resource contracheque not found in package %s", path)
 	}
@@ -157,7 +159,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return rc, fmt.Errorf("failed to cast ContraCheque_CSV: %s", err)
 	}
 
-	remuneracao := pkg.GetResource("remuneracao")
+	remuneracao := pkg.GetResource(remuneracaoResource)
 	if remuneracao == nil {
 		return rc, fmt.Errorf("resource remuneracao not found in package %s", path)
 	}
@@ -166,7 +168,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return rc, fmt.Errorf("failed to cast Remuneracao_CSV: %s", err)
 	}
 
-	metadados := pkg.GetResource("metadados")
+	metadados := pkg.GetResource(metadadosResource)
 	if metadados == nil {
 		return rc, fmt.Errorf("resource metadados not found in package %s", path)
 	}
@@ -180,7 +182,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		Remuneracoes: remuneracao_CSV,
 		Folha:        contracheque_CSV,
 		Metadados:    metadados_CSV,
-	}, err
+	}, nil
 }
 
 // ToCSVFile dumps the payroll into a file using the CSV format.
