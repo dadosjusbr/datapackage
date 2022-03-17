@@ -150,7 +150,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 
 	contracheque := pkg.GetResource("contracheque")
 	if contracheque == nil {
-		return rc, fmt.Errorf("error loading contracheque resource")
+		return rc, fmt.Errorf("resource contracheque not found in package %s", path)
 	}
 	var contracheque_CSV []*ContraCheque_CSV
 	if err := contracheque.Cast(&contracheque_CSV, csv.LoadHeaders()); err != nil {
