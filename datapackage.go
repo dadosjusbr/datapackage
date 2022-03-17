@@ -130,8 +130,8 @@ func Zip(path string, rc *ResultadoColeta_CSV) error {
 }
 
 func Load(path string) (ResultadoColeta_CSV, error) {
-	pkg, err := datapackage.Load(path)
 	var rc ResultadoColeta_CSV
+	pkg, err := datapackage.Load(path)
 
 	if err != nil {
 		return rc, fmt.Errorf("error loading datapackage (%s):%q", path, err)
