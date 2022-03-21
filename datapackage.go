@@ -20,7 +20,7 @@ const (
 	metadadosFileName    = "metadados.csv"               // hardcoded in datapackage_descriptor.json
 	packageFileName      = "datapackage_descriptor.json" // name of datapackage descriptor
 	coletaResource		 = "coleta" 					 // hardcoded in datapackage_descriptor.json
-	contrachequeResource = "contracheque"				 // hardcoded in datapackage_descriptor.json
+	contrachequeResource = "contra_cheque"				 // hardcoded in datapackage_descriptor.json
 	remuneracaoResource  = "remuneracao"				 // hardcoded in datapackage_descriptor.json
 	metadadosResource    = "metadados"					 // hardcoded in datapackage_descriptor.json
 )
