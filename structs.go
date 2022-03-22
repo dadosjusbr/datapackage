@@ -5,10 +5,10 @@ import (
 )
 
 type ResultadoColeta_CSV struct {
-	Coleta       []*Coleta_CSV
-	Remuneracoes []*Remuneracao_CSV
-	Folha        []*ContraCheque_CSV
-	Metadados    []*Metadados_CSV
+	Coleta       []Coleta_CSV
+	Remuneracoes []Remuneracao_CSV
+	Folha        []ContraCheque_CSV
+	Metadados    []Metadados_CSV
 }
 
 type Coleta_CSV struct {

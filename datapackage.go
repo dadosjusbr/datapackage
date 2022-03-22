@@ -27,8 +27,8 @@ const (
 
 func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
 	var coleta Coleta_CSV
-	var remuneracoes []*Remuneracao_CSV
-	var folha []*ContraCheque_CSV
+	var remuneracoes []Remuneracao_CSV
+	var folha []ContraCheque_CSV
 
 	coleta.ChaveColeta = rc.Coleta.ChaveColeta
 	coleta.Orgao = rc.Coleta.Orgao
@@ -75,16 +75,16 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) *ResultadoColeta_CSV {
 			remuneracao.Categoria = k.Categoria
 			remuneracao.Item = k.Item
 			remuneracao.Valor = k.Valor
-			remuneracoes = append(remuneracoes, &remuneracao)
+			remuneracoes = append(remuneracoes, remuneracao)
 		}
-		folha = append(folha, &contraCheque)
+		folha = append(folha, contraCheque)
 	}
 
 	return &ResultadoColeta_CSV{
-		Coleta:       append([]*Coleta_CSV{}, &coleta),
+		Coleta:       append([]Coleta_CSV{}, coleta),
 		Remuneracoes: remuneracoes,
 		Folha:        folha,
-		Metadados:    append([]*Metadados_CSV{}, &metadados),
+		Metadados:    append([]Metadados_CSV{}, metadados),
 	}
 }
 
@@ -145,7 +145,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 	if coleta == nil {
 		return rc, fmt.Errorf("resource coleta not found in package %s", path)
 	}
-	var coleta_CSV []*Coleta_CSV
+	var coleta_CSV []Coleta_CSV
 	if err := coleta.Cast(&coleta_CSV, csv.LoadHeaders()); err != nil {
 		return rc, fmt.Errorf("failed to cast Coleta_CSV: %s", err)
 	}
@@ -154,7 +154,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 	if contracheque == nil {
 		return rc, fmt.Errorf("resource contracheque not found in package %s", path)
 	}
-	var contracheque_CSV []*ContraCheque_CSV
+	var contracheque_CSV []ContraCheque_CSV
 	if err := contracheque.Cast(&contracheque_CSV, csv.LoadHeaders()); err != nil {
 		return rc, fmt.Errorf("failed to cast ContraCheque_CSV: %s", err)
 	}
@@ -163,7 +163,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 	if remuneracao == nil {
 		return rc, fmt.Errorf("resource remuneracao not found in package %s", path)
 	}
-	var remuneracao_CSV []*Remuneracao_CSV
+	var remuneracao_CSV []Remuneracao_CSV
 	if err := remuneracao.Cast(&remuneracao_CSV, csv.LoadHeaders()); err != nil {
 		return rc, fmt.Errorf("failed to cast Remuneracao_CSV: %s", err)
 	}
@@ -172,7 +172,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 	if metadados == nil {
 		return rc, fmt.Errorf("resource metadados not found in package %s", path)
 	}
-	var metadados_CSV []*Metadados_CSV
+	var metadados_CSV []Metadados_CSV
 	if err := metadados.Cast(&metadados_CSV, csv.LoadHeaders()); err != nil {
 		return rc, fmt.Errorf("failed to cast Metadados_CSV: %s", err)
 	}
