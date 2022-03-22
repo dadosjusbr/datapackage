@@ -1,8 +1,8 @@
 package datapackage
 
 import (
-	"testing"
 	"github.com/google/go-cmp/cmp"
+	"testing"
 )
 
 func TestLoad(t *testing.T) {
