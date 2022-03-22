@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	oldPackageJson       = "./datapackage_old_descriptor.json"
 	coletaFileName       = "coleta.csv"                  // hardcoded in datapackage_descriptor.json
 	folhaFileName        = "contra_cheque.csv"           // hardcoded in datapackage_descriptor.json
 	remuneracaoFileName  = "remuneracao.csv"             // hardcoded in datapackage_descriptor.json
@@ -141,6 +142,18 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return rc, fmt.Errorf("error loading datapackage (%s):%q", path, err)
 	}
 
+	oldDesc, err := os.Open(oldPackageJson)
+
+	if err != nil {
+		return rc, fmt.Errorf("error opening json (%s):%q", path, err)
+	}
+
+	byteValue, _ := ioutil.ReadAll(oldDesc)
+	var oldPkg map[string]interface{}
+
+	json.Unmarshal(byteValue, &oldPkg)
+	pkg.Update(oldPkg)
+
 	coleta := pkg.GetResource(coletaResource)
 	if coleta == nil {
 		return rc, fmt.Errorf("resource coleta not found in package %s", path)
@@ -172,16 +185,16 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 	if metadados == nil {
 		return rc, fmt.Errorf("resource metadados not found in package %s", path)
 	}
-	var metadados_CSV []Metadados_CSV
+	var metadados_CSV []Metadados_OLD_CSV
 	if err := metadados.Cast(&metadados_CSV, csv.LoadHeaders()); err != nil {
 		return rc, fmt.Errorf("failed to cast Metadados_CSV: %s", err)
 	}
 
 	return ResultadoColeta_CSV{
-		Coleta:       coleta_CSV,
-		Remuneracoes: remuneracao_CSV,
-		Folha:        contracheque_CSV,
-		Metadados:    metadados_CSV,
+		Coleta:        coleta_CSV,
+		Remuneracoes:  remuneracao_CSV,
+		Folha:         contracheque_CSV,
+		Metadados_OLD: metadados_CSV,
 	}, nil
 }
 
