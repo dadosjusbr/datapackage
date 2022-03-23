@@ -265,6 +265,17 @@
         "schema": {
             "fields": [
                 {
+                    "name": "chave_coleta",
+                    "type": "string",
+                    "format": "default",
+                    "title": "Chave coleta",
+                    "description": "The Unique Key of collection",
+                    "description-ptbr": "A chave única da coleta ",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
                     "name": "nao_requer_login",
                     "type": "boolean",
                     "format": "default",
