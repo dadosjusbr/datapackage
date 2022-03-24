@@ -56,13 +56,13 @@
                 },
                 {
                     "name": "timestamp_coleta",
-                    "type": "time",
-                    "title": "Ano",
-                    "description": "Timestamp mark of data crawled",
+                    "type": "datetime",
+                    "format": "%Y-%m-%dT%H:%M:%S.fZ",
+                    "title": "Timestamp que a coleta aconteceu.",
+                    "description": "Timestamp mark of data crawled.",
                     "description-ptbr": "Contém o tempo em que o dado foi coletado.",
                     "constraints": {
-                        "required": true,
-                        "minimum": "0"
+                        "required": true
                     }
                 },  
                 {
@@ -155,9 +155,6 @@
                     "description": "Role of the employee",
                     "format": "default",
                     "description-ptbr": "A função do membro",
-                    "constraints": {
-                        "required": true
-                    }
                 },
                 {
                     "name": "local_trabalho",

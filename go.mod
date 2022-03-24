@@ -7,7 +7,6 @@ require (
 	github.com/frictionlessdata/datapackage-go v0.0.0-20211203133945-d15c67ff953e
 	github.com/frictionlessdata/tableschema-go v0.1.5-0.20190521014818-f9bf38926664
 	github.com/gocarina/gocsv v0.0.0-20200827134620-49f5c3fa2b3e
-	github.com/google/go-cmp v0.5.5
 )
 
 require (
