@@ -43,6 +43,9 @@ var (
 		DetalhamentoReceitaBase:    "DETALHADO",
 		DetalhamentoOutrasReceitas: "DETALHADO",
 		DetalhamentoDescontos:      "DETALHADO",
+		IndiceCompletude:           0.61538464,
+		IndiceFacilidade:           0.5,
+		IndiceTransparencia:        0.8,
 	}
 	remuneracaoTest = Remuneracao_CSV{
 		ChaveColeta:    "tjal/02/2020",
@@ -101,6 +104,9 @@ func TestNewResultadoColetaCSV(t *testing.T) {
 			ReceitaBase:         coleta.Metadados_DETALHADO,
 			OutrasReceitas:      coleta.Metadados_DETALHADO,
 			Despesas:            coleta.Metadados_DETALHADO,
+			IndiceCompletude:    0.61538464,
+			IndiceFacilidade:    0.5,
+			IndiceTransparencia: 0.8,
 		},
 	}
 	assert.Equal(t, resultadoColeta, NewResultadoColetaCSV(&in))
