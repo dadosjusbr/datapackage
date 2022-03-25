@@ -138,10 +138,10 @@ func TestLoad_Success(t *testing.T) {
 }
 
 func TestZip_Success(t *testing.T) {
-	assert.NoError(t, Zip("datapackage_criado.zip", descriptorFileName, resultadoColeta, false), "want no err during Zip")
+	assert.NoError(t, Zip("datapackage_criado.zip", resultadoColeta, false), "want no err during Zip")
 	defer func() {
 		os.Remove(coletaFileName)
-		os.Remove(folhaFileName)
+		os.Remove(contrachequeFileName)
 		os.Remove(remuneracaoFileName)
 		os.Remove(metadadosFileName)
 		os.Remove("datapackage_criado.zip")
@@ -156,7 +156,7 @@ func TestZip_Success(t *testing.T) {
 
 	t.Run("CheckContraCheque", func(t *testing.T) {
 		var got []ContraCheque_CSV
-		assert.NoError(t, fromCSVFile(&got, folhaFileName), "want no err during retrieving folha csv")
+		assert.NoError(t, fromCSVFile(&got, contrachequeFileName), "want no err during retrieving folha csv")
 		assert.Equal(t, 1, len(got))
 		assert.Equal(t, contraChequeTest, got[0])
 	})

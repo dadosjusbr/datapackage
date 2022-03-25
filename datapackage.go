@@ -3,7 +3,6 @@ package datapackage
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -13,15 +12,14 @@ import (
 )
 
 const (
-	coletaFileName       = "coleta.csv"                  // hardcoded in datapackage_descriptor.json
-	folhaFileName        = "contra_cheque.csv"           // hardcoded in datapackage_descriptor.json
-	remuneracaoFileName  = "remuneracao.csv"             // hardcoded in datapackage_descriptor.json
-	metadadosFileName    = "metadados.csv"               // hardcoded in datapackage_descriptor.json
-	descriptorFileName   = "datapackage_descriptor.json" // name of datapackage descriptor
-	coletaResource       = "coleta"                      // hardcoded in datapackage_descriptor.json
-	contrachequeResource = "contra_cheque"               // hardcoded in datapackage_descriptor.json
-	remuneracaoResource  = "remuneracao"                 // hardcoded in datapackage_descriptor.json
-	metadadosResource    = "metadados"                   // hardcoded in datapackage_descriptor.json
+	coletaFileName           = "coleta.csv"        // hardcoded in datapackage_descriptor.json
+	contrachequeFileName     = "contra_cheque.csv" // hardcoded in datapackage_descriptor.json
+	remuneracaoFileName      = "remuneracao.csv"   // hardcoded in datapackage_descriptor.json
+	metadadosFileName        = "metadados.csv"     // hardcoded in datapackage_descriptor.json
+	coletaResourceName       = "coleta"            // hardcoded in datapackage_descriptor.json
+	contrachequeResourceName = "contra_cheque"     // hardcoded in datapackage_descriptor.json
+	remuneracaoResourceName  = "remuneracao"       // hardcoded in datapackage_descriptor.json
+	metadadosResourceName    = "metadados"         // hardcoded in datapackage_descriptor.json
 )
 
 func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
@@ -87,10 +85,10 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
 	}
 }
 
-func Zip(outputPath string, descriptorPath string, rc ResultadoColeta_CSV, cleanup bool) error {
+func Zip(outputPath string, rc ResultadoColeta_CSV, cleanup bool) error {
 	outDir := filepath.Dir(outputPath)
 	coletaCSVPath := filepath.Join(outDir, coletaFileName)
-	folhaCSVPath := filepath.Join(outDir, folhaFileName)
+	folhaCSVPath := filepath.Join(outDir, contrachequeFileName)
 	remuneracaoCSVPath := filepath.Join(outDir, remuneracaoFileName)
 	metadadosCSVPath := filepath.Join(outDir, metadadosFileName)
 
@@ -123,13 +121,13 @@ func Zip(outputPath string, descriptorPath string, rc ResultadoColeta_CSV, clean
 		return fmt.Errorf("error creating Metadados CSV (%s):%q", metadadosCSVPath, err)
 	}
 
-	c, err := ioutil.ReadFile(descriptorPath)
+	b, err := json.Marshal(dadosjusbrDescriptor)
 	if err != nil {
-		return fmt.Errorf("error reading %s:%q", descriptorPath, err)
+		return fmt.Errorf("error marshalling dadosjusbr descriptor:%w", err)
 	}
 	var desc map[string]interface{}
-	if err := json.Unmarshal(c, &desc); err != nil {
-		return fmt.Errorf("error unmarshaling datapackage descriptor (%s):%q", descriptorPath, err)
+	if err := json.Unmarshal(b, &desc); err != nil {
+		return fmt.Errorf("error converting datapackage descriptor into map:%w", err)
 	}
 	pkg, err := datapackage.New(desc, outDir)
 	if err != nil {
@@ -147,7 +145,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return ResultadoColeta_CSV{}, fmt.Errorf("error loading datapackage (%s):%q", path, err)
 	}
 
-	coleta := pkg.GetResource(coletaResource)
+	coleta := pkg.GetResource(coletaResourceName)
 	if coleta == nil {
 		return ResultadoColeta_CSV{}, fmt.Errorf("resource coleta not found in package %s", path)
 	}
@@ -156,7 +154,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return ResultadoColeta_CSV{}, fmt.Errorf("failed to cast Coleta_CSV: %s", err)
 	}
 
-	contracheque := pkg.GetResource(contrachequeResource)
+	contracheque := pkg.GetResource(contrachequeResourceName)
 	if contracheque == nil {
 		return ResultadoColeta_CSV{}, fmt.Errorf("resource contra_cheque not found in package %s", path)
 	}
@@ -165,7 +163,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return ResultadoColeta_CSV{}, fmt.Errorf("failed to cast ContraCheque_CSV: %s", err)
 	}
 
-	remuneracao := pkg.GetResource(remuneracaoResource)
+	remuneracao := pkg.GetResource(remuneracaoResourceName)
 	if remuneracao == nil {
 		return ResultadoColeta_CSV{}, fmt.Errorf("resource remuneracao not found in package %s", path)
 	}
@@ -174,7 +172,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		return ResultadoColeta_CSV{}, fmt.Errorf("failed to cast Remuneracao_CSV: %s", err)
 	}
 
-	metadados := pkg.GetResource(metadadosResource)
+	metadados := pkg.GetResource(metadadosResourceName)
 	if metadados == nil {
 		return ResultadoColeta_CSV{}, fmt.Errorf("resource metadados not found in package %s", path)
 	}
