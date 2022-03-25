@@ -138,7 +138,7 @@ func TestLoad_Success(t *testing.T) {
 }
 
 func TestZip_Success(t *testing.T) {
-	assert.NoError(t, Zip("datapackage_criado.zip", descriptorFileName, &resultadoColeta, false), "want no err during Zip")
+	assert.NoError(t, Zip("datapackage_criado.zip", descriptorFileName, resultadoColeta, false), "want no err during Zip")
 	defer func() {
 		os.Remove(coletaFileName)
 		os.Remove(folhaFileName)

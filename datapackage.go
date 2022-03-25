@@ -88,7 +88,7 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
 	}
 }
 
-func Zip(outputPath string, descriptorPath string, rc *ResultadoColeta_CSV, cleanup bool) error {
+func Zip(outputPath string, descriptorPath string, rc ResultadoColeta_CSV, cleanup bool) error {
 	outDir := filepath.Dir(outputPath)
 	coletaCSVPath := filepath.Join(outDir, coletaFileName)
 	folhaCSVPath := filepath.Join(outDir, folhaFileName)
