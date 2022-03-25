@@ -154,7 +154,7 @@
                     "type": "string",
                     "description": "Role of the employee",
                     "format": "default",
-                    "description-ptbr": "A função do membro",
+                    "description-ptbr": "A função do membro"
                 },
                 {
                     "name": "local_trabalho",
@@ -460,6 +460,5 @@
           "title": "Creative Commons Attribution 4.0",
           "path": "https://creativecommons.org/licenses/by/4.0/"
         }
-    ]
-    
+    ]    
 }

@@ -18,7 +18,7 @@ const (
 	folhaFileName        = "contra_cheque.csv"           // hardcoded in datapackage_descriptor.json
 	remuneracaoFileName  = "remuneracao.csv"             // hardcoded in datapackage_descriptor.json
 	metadadosFileName    = "metadados.csv"               // hardcoded in datapackage_descriptor.json
-	packageFileName      = "datapackage_descriptor.json" // name of datapackage descriptor
+	descriptorFileName   = "datapackage_descriptor.json" // name of datapackage descriptor
 	coletaResource       = "coleta"                      // hardcoded in datapackage_descriptor.json
 	contrachequeResource = "contra_cheque"               // hardcoded in datapackage_descriptor.json
 	remuneracaoResource  = "remuneracao"                 // hardcoded in datapackage_descriptor.json
@@ -88,48 +88,57 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
 	}
 }
 
-func Zip(path string, rc *ResultadoColeta_CSV) error {
+func Zip(outputPath string, descriptorPath string, rc *ResultadoColeta_CSV, cleanup bool) error {
+	outDir := filepath.Dir(outputPath)
+	coletaCSVPath := filepath.Join(outDir, coletaFileName)
+	folhaCSVPath := filepath.Join(outDir, folhaFileName)
+	remuneracaoCSVPath := filepath.Join(outDir, remuneracaoFileName)
+	metadadosCSVPath := filepath.Join(outDir, metadadosFileName)
+
+	defer func() {
+		if cleanup {
+			os.Remove(coletaCSVPath)
+			os.Remove(folhaCSVPath)
+			os.Remove(remuneracaoCSVPath)
+			os.Remove(metadadosCSVPath)
+		}
+	}()
+
 	// Creating coleta csv
-	if err := toCSVFile(rc.Coleta, coletaFileName); err != nil {
-		return fmt.Errorf("error creating Coleta CSV:%q", err)
+	if err := toCSVFile(rc.Coleta, coletaCSVPath); err != nil {
+		return fmt.Errorf("error creating Coleta CSV (%s):%q", coletaCSVPath, err)
 	}
 
 	// Creating contracheque csv
-	if err := toCSVFile(rc.Folha, folhaFileName); err != nil {
-		return fmt.Errorf("error creating Folha de pagamento CSV:%q", err)
+	if err := toCSVFile(rc.Folha, folhaCSVPath); err != nil {
+		return fmt.Errorf("error creating Folha de pagamento CSV (%s):%q", folhaCSVPath, err)
 	}
 
 	// Creating remuneracao csv
-	if err := toCSVFile(rc.Remuneracoes, remuneracaoFileName); err != nil {
-		return fmt.Errorf("error creating Remuneração CSV:%q", err)
+	if err := toCSVFile(rc.Remuneracoes, remuneracaoCSVPath); err != nil {
+		return fmt.Errorf("error creating Remuneração CSV (%s):%q", remuneracaoCSVPath, err)
 	}
 
 	// Creating metadata csv
-	if err := toCSVFile(rc.Metadados, metadadosFileName); err != nil {
-		return fmt.Errorf("error creating Metadados CSV:%q", err)
+	if err := toCSVFile(rc.Metadados, metadadosCSVPath); err != nil {
+		return fmt.Errorf("error creating Metadados CSV (%s):%q", metadadosCSVPath, err)
 	}
 
-	c, err := ioutil.ReadFile(packageFileName)
+	c, err := ioutil.ReadFile(descriptorPath)
 	if err != nil {
-		return fmt.Errorf("error reading datapackge_descriptor.json:%q", err)
+		return fmt.Errorf("error reading %s:%q", descriptorPath, err)
 	}
-
 	var desc map[string]interface{}
 	if err := json.Unmarshal(c, &desc); err != nil {
-		return fmt.Errorf("error unmarshaling datapackage descriptor:%q", err)
+		return fmt.Errorf("error unmarshaling datapackage descriptor (%s):%q", descriptorPath, err)
 	}
-
-	pkg, err := datapackage.New(desc, ".")
+	pkg, err := datapackage.New(desc, outDir)
 	if err != nil {
 		return fmt.Errorf("error create datapackage:%q", err)
 	}
-
-	// Packing CSV and package descriptor.
-	zipName := filepath.Join(path)
-	if err := pkg.Zip(zipName); err != nil {
-		return fmt.Errorf("error zipping datapackage (%s):%q", zipName, err)
+	if err := pkg.Zip(outputPath); err != nil {
+		return fmt.Errorf("error zipping datapackage (%s):%q", outputPath, err)
 	}
-
 	return err
 }
 
@@ -183,7 +192,7 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 	}, nil
 }
 
-// ToCSVFile dumps the payroll into a file using the CSV format.
+// toCSVFile dumps the payroll into a file using the CSV format.
 func toCSVFile(in interface{}, path string) error {
 	f, err := os.Create(path)
 	if err != nil {
@@ -191,4 +200,13 @@ func toCSVFile(in interface{}, path string) error {
 	}
 	defer f.Close()
 	return gocsv.MarshalFile(in, f)
+}
+
+// fromCSVFile gets from CSV to a certain struct.
+func fromCSVFile(in interface{}, path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	return gocsv.UnmarshalFile(f, in)
 }
