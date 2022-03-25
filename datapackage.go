@@ -10,7 +10,6 @@ import (
 	"github.com/dadosjusbr/proto/coleta"
 	"github.com/frictionlessdata/datapackage-go/datapackage"
 	"github.com/frictionlessdata/tableschema-go/csv"
-	"github.com/gocarina/gocsv"
 )
 
 const (
@@ -190,23 +189,4 @@ func Load(path string) (ResultadoColeta_CSV, error) {
 		Folha:        contracheque_CSV,
 		Metadados:    metadados_CSV,
 	}, nil
-}
-
-// toCSVFile dumps the payroll into a file using the CSV format.
-func toCSVFile(in interface{}, path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("error creating CSV file(%s):%q", path, err)
-	}
-	defer f.Close()
-	return gocsv.MarshalFile(in, f)
-}
-
-// fromCSVFile gets from CSV to a certain struct.
-func fromCSVFile(in interface{}, path string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	return gocsv.UnmarshalFile(f, in)
 }

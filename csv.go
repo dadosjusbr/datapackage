@@ -1,7 +1,11 @@
 package datapackage
 
 import (
+	"fmt"
+	"os"
 	"time"
+
+	"github.com/gocarina/gocsv"
 )
 
 type ResultadoColeta_CSV struct {
@@ -59,4 +63,23 @@ type Remuneracao_CSV struct {
 	Categoria      string  `csv:"categoria" tableheader:"categoria"`
 	Item           string  `csv:"item" tableheader:"item"`
 	Valor          float64 `csv:"valor" tableheader:"valor"`
+}
+
+// toCSVFile dumps the payroll into a file using the CSV format.
+func toCSVFile(in interface{}, path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("error creating CSV file(%s):%q", path, err)
+	}
+	defer f.Close()
+	return gocsv.MarshalFile(in, f)
+}
+
+// fromCSVFile gets from CSV to a certain struct.
+func fromCSVFile(in interface{}, path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	return gocsv.UnmarshalFile(f, in)
 }
