@@ -1,4 +1,4 @@
-module datapackage
+module github.com/dadosjusbr/datapackage
 
 go 1.17
 
