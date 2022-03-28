@@ -113,7 +113,7 @@ func TestNewResultadoColetaCSV(t *testing.T) {
 }
 
 func TestLoad_Success(t *testing.T) {
-	rc, err := Load("test_datapackage.zip")
+	rc, err := Load("test_datapackage_load.zip")
 	assert.NoError(t, err, "want no erro on Load")
 
 	t.Run("CheckColeta", func(t *testing.T) {
@@ -137,6 +137,24 @@ func TestLoad_Success(t *testing.T) {
 	})
 }
 
+func TestLoad_Error(t *testing.T) {
+	testData := []struct {
+		desc string
+		path string
+	}{
+		{"FileNotFound", "fileNotFound"},
+		{"MissingColeta", "test_datapackage_missing_coleta.zip"},
+		{"MissingContracheque", "test_datapackage_missing_contracheque.zip"},
+		{"MissingMetadados", "test_datapackage_missing_metadados.zip"},
+		{"MissingRemuneracao", "test_datapackage_missing_remuneracao.zip"},
+	}
+	for _, d := range testData {
+		t.Run(d.desc, func(t *testing.T) {
+			_, err := Load(d.path)
+			assert.Error(t, err)
+		})
+	}
+}
 func TestZip_Success(t *testing.T) {
 	assert.NoError(t, Zip("datapackage_criado.zip", resultadoColeta, false), "want no err during Zip")
 	defer func() {

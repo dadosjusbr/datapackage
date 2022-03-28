@@ -121,13 +121,10 @@ func Zip(outputPath string, rc ResultadoColeta_CSV, cleanup bool) error {
 		return fmt.Errorf("error creating Metadados CSV (%s):%q", metadadosCSVPath, err)
 	}
 
-	b, err := json.Marshal(dadosjusbrDescriptor)
+	// Creating datapackage
+	desc, err := descriptorMap()
 	if err != nil {
-		return fmt.Errorf("error marshalling dadosjusbr descriptor:%w", err)
-	}
-	var desc map[string]interface{}
-	if err := json.Unmarshal(b, &desc); err != nil {
-		return fmt.Errorf("error converting datapackage descriptor into map:%w", err)
+		return err
 	}
 	pkg, err := datapackage.New(desc, outDir)
 	if err != nil {
@@ -136,7 +133,19 @@ func Zip(outputPath string, rc ResultadoColeta_CSV, cleanup bool) error {
 	if err := pkg.Zip(outputPath); err != nil {
 		return fmt.Errorf("error zipping datapackage (%s):%q", outputPath, err)
 	}
-	return err
+	return nil
+}
+
+func descriptorMap() (map[string]interface{}, error) {
+	b, err := json.Marshal(dadosjusbrDescriptor)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling dadosjusbr descriptor:%w", err)
+	}
+	var desc map[string]interface{}
+	if err := json.Unmarshal(b, &desc); err != nil {
+		return nil, fmt.Errorf("error converting datapackage descriptor into map:%w", err)
+	}
+	return desc, nil
 }
 
 func Load(path string) (ResultadoColeta_CSV, error) {
