@@ -1,7 +1,7 @@
 package datapackage
 
 // Versão compilável do descritor JSON dos dados consolidados e publicados pelo projeto DadosJusBR.
-// Além de facilitar a manutenção, permite a criação de uma biblioteca que lida com a crianção
+// Além de facilitar a manutenção, permite a criação de uma biblioteca que lida com a criação
 // e carregamento de pacotes de dados.
 var dadosjusbrDescriptor = dadosjusbrDescriptorStruct{
 	Name:         "remuneracoes-jusbr",
