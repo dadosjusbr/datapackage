@@ -379,7 +379,7 @@ var metadadosResource = Resource{
 				Constraints:     Constraints{Required: true},
 			},
 			{
-				Name:            "indice_completude",
+				Name:            "indice_facilidade",
 				Type:            "number",
 				Format:          "default",
 				Title:           "Componente facilidade do índice de transparência DadosJusBR",
