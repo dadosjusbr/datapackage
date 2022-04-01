@@ -8,6 +8,7 @@ import (
 
 	"github.com/dadosjusbr/proto/coleta"
 	"github.com/frictionlessdata/datapackage-go/datapackage"
+	"github.com/frictionlessdata/datapackage-go/validator"
 	"github.com/frictionlessdata/tableschema-go/csv"
 )
 
@@ -149,7 +150,7 @@ func descriptorMap() (map[string]interface{}, error) {
 }
 
 func Load(path string) (ResultadoColeta_CSV, error) {
-	pkg, err := datapackage.Load(path)
+	pkg, err := datapackage.Load(path, validator.InMemoryLoader())
 	if err != nil {
 		return ResultadoColeta_CSV{}, fmt.Errorf("error loading datapackage (%s):%q", path, err)
 	}

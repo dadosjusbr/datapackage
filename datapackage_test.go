@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dadosjusbr/proto/coleta"
+	"github.com/frictionlessdata/datapackage-go/datapackage"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -165,31 +166,58 @@ func TestZip_Success(t *testing.T) {
 		os.Remove("datapackage_criado.zip")
 	}()
 
-	t.Run("CheckColeta", func(t *testing.T) {
-		var got []Coleta_CSV
-		assert.NoError(t, fromCSVFile(&got, coletaFileName), "want no err during retrieving coleta csv")
-		assert.Equal(t, 1, len(got))
-		assert.Equal(t, coletaTest, got[0])
+	t.Run("Contents", func(t *testing.T) {
+		t.Run("CheckColeta", func(t *testing.T) {
+			var got []Coleta_CSV
+			assert.NoError(t, fromCSVFile(&got, coletaFileName), "want no err during retrieving coleta csv")
+			assert.Equal(t, 1, len(got))
+			assert.Equal(t, coletaTest, got[0])
+		})
+		t.Run("ContraCheque", func(t *testing.T) {
+			var got []ContraCheque_CSV
+			assert.NoError(t, fromCSVFile(&got, contrachequeFileName), "want no err during retrieving folha csv")
+			assert.Equal(t, 1, len(got))
+			assert.Equal(t, contraChequeTest, got[0])
+		})
+
+		t.Run("Metadados", func(t *testing.T) {
+			var got []Metadados_CSV
+			assert.NoError(t, fromCSVFile(&got, metadadosFileName), "want no err during retrieving metadados csv")
+			assert.Equal(t, 1, len(got))
+			assert.Equal(t, metadadosTest, got[0])
+		})
+
+		t.Run("Remuneracoes", func(t *testing.T) {
+			var got []Remuneracao_CSV
+			assert.NoError(t, fromCSVFile(&got, remuneracaoFileName), "want no err during retrieving remuneracoes csv")
+			assert.Equal(t, 1, len(got))
+			assert.Equal(t, remuneracaoTest, got[0])
+		})
 	})
 
-	t.Run("CheckContraCheque", func(t *testing.T) {
-		var got []ContraCheque_CSV
-		assert.NoError(t, fromCSVFile(&got, contrachequeFileName), "want no err during retrieving folha csv")
-		assert.Equal(t, 1, len(got))
-		assert.Equal(t, contraChequeTest, got[0])
-	})
-
-	t.Run("CheckMetadados", func(t *testing.T) {
-		var got []Metadados_CSV
-		assert.NoError(t, fromCSVFile(&got, metadadosFileName), "want no err during retrieving metadados csv")
-		assert.Equal(t, 1, len(got))
-		assert.Equal(t, metadadosTest, got[0])
-	})
-
-	t.Run("CheckRemuneracoes", func(t *testing.T) {
-		var got []Remuneracao_CSV
-		assert.NoError(t, fromCSVFile(&got, remuneracaoFileName), "want no err during retrieving remuneracoes csv")
-		assert.Equal(t, 1, len(got))
-		assert.Equal(t, remuneracaoTest, got[0])
+	t.Run("CheckSchema", func(t *testing.T) {
+		pkg, err := datapackage.Load("datapackage_criado.zip")
+		assert.NoError(t, err)
+		resNames := []struct {
+			resName   string
+			numFields int
+		}{
+			{coletaResourceName, len(coletaResource.Schema.Fields)},
+			{contrachequeResourceName, len(contraChequeResource.Schema.Fields)},
+			{remuneracaoResourceName, len(remuneracaoResource.Schema.Fields)},
+			{metadadosResourceName, len(metadadosResource.Schema.Fields)},
+		}
+		for _, data := range resNames {
+			t.Run(data.resName, func(t *testing.T) {
+				res := pkg.GetResource(data.resName)
+				assert.NotNil(t, res)
+				sch, err := res.GetSchema()
+				assert.NoError(t, err)
+				assert.NoError(t, sch.Validate())
+				assert.Equal(t, data.resName, res.Name())
+				assert.Equal(t, data.numFields, len(sch.Fields))
+				assert.Greater(t, len(sch.Fields), 0)
+			})
+		}
 	})
 }
