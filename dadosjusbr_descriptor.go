@@ -300,7 +300,7 @@ var metadadosResource = Resource{
 				Title:           "Extensão",
 				Description:     "Extension of the original data file.",
 				DescriptionPTBR: "Extensao do arquivo de dados, ex: CSV, JSON, XLS, etc",
-				Constraints:     Constraints{Required: true, Enum: []string{"PDF", "ODS", "XLS", "JSON", "CSV"}},
+				Constraints:     Constraints{Required: true, Enum: []string{"PDF", "ODS", "XLS", "JSON", "CSV", "HTML"}},
 			},
 			{
 				Name:            "estritamente_tabular",
