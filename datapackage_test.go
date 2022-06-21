@@ -138,6 +138,31 @@ func TestLoad_Success(t *testing.T) {
 	})
 }
 
+func TestLoad_Remote(t *testing.T) {
+	rc, err := Load("https://github.com/dadosjusbr/datapackage/raw/main/test_datapackage_load.zip")
+	assert.NoError(t, err, "want no erro on Load")
+
+	t.Run("CheckColeta", func(t *testing.T) {
+		assert.Equal(t, 1, len(rc.Coleta))
+		assert.Equal(t, coletaTest, rc.Coleta[0])
+	})
+
+	t.Run("CheckContraCheque", func(t *testing.T) {
+		assert.Equal(t, 214, len(rc.Folha))
+		assert.Equal(t, contraChequeTest, rc.Folha[0])
+	})
+
+	t.Run("CheckMetadados", func(t *testing.T) {
+		assert.Equal(t, 1, len(rc.Metadados))
+		assert.Equal(t, metadadosTest, rc.Metadados[0])
+	})
+
+	t.Run("CheckRemuneracao", func(t *testing.T) {
+		assert.Equal(t, 5354, len(rc.Remuneracoes))
+		assert.Equal(t, remuneracaoTest, rc.Remuneracoes[0])
+	})
+}
+
 func TestLoad_Error(t *testing.T) {
 	testData := []struct {
 		desc string
