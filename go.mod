@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/dadosjusbr/proto v0.0.0-20220304160723-47e93e9d97b5
-	github.com/frictionlessdata/datapackage-go v1.0.3
+	github.com/frictionlessdata/datapackage-go v1.0.4
 	github.com/frictionlessdata/tableschema-go v1.1.4-0.20220401172006-6cc5f3b2411c
 	github.com/gocarina/gocsv v0.0.0-20220310154401-d4df709ca055
 	github.com/stretchr/testify v1.7.1
