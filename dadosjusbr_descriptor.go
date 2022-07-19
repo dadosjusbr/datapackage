@@ -63,7 +63,7 @@ var coletaResource = Resource{
 			{
 				Name:            "timestamp_coleta",
 				Type:            "datetime",
-				Format:          "%Y-%m-%dT%H:%M:%S.fZ",
+				Format:          "%Y-%m-%dT%H:%M:%S.%fZ",
 				Title:           "Timestamp que a coleta aconteceu",
 				Description:     "Timestamp mark of data crawled",
 				DescriptionPTBR: "Contém a marca temporal em que o dado foi coletado",
