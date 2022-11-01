@@ -41,6 +41,7 @@ type Metadados_CSV struct {
 	ChaveColeta                string  `csv:"chave_coleta" tableheader:"chave_coleta"`
 	NaoRequerLogin             bool    `csv:"nao_requer_login" tableheader:"nao_requer_login"`                         // É necessário login para coleta dos dados?
 	NaoRequerCaptcha           bool    `csv:"nao_requer_captcha" tableheader:"nao_requer_captcha"`                     // É necessário captcha para coleta dos dados?
+	FormatoAberto              bool    `csv:"formato_aberto" tableheader:"formato_aberto"`                             // Os dados são disponibilizados em formato aberto?
 	Acesso                     string  `csv:"acesso" tableheader:"acesso"`                                             // Conseguimos prever/construir uma URL com base no órgão/mês/ano que leve ao download do dado?
 	Extensao                   string  `csv:"extensao" tableheader:"extensao"`                                         // Extensao do arquivo de dados, ex: CSV, JSON, XLS, etc
 	EstritamenteTabular        bool    `csv:"estritamente_tabular" tableheader:"estritamente_tabular"`                 // Órgãos que disponibilizam dados limpos (tidy data)

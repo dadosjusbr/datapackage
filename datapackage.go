@@ -41,6 +41,7 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
 	metadados.ChaveColeta = rc.Coleta.ChaveColeta
 	metadados.NaoRequerLogin = rc.Metadados.NaoRequerLogin
 	metadados.NaoRequerCaptcha = rc.Metadados.NaoRequerCaptcha
+	metadados.FormatoAberto = rc.Metadados.FormatoAberto
 	metadados.Acesso = rc.Metadados.Acesso.String()
 	metadados.Extensao = rc.Metadados.Extensao.String()
 	metadados.EstritamenteTabular = rc.Metadados.EstritamenteTabular

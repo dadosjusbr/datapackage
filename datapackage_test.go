@@ -34,6 +34,7 @@ var (
 		ChaveColeta:                "tjal/02/2020",
 		NaoRequerLogin:             true,
 		NaoRequerCaptcha:           true,
+		FormatoAberto:              false,
 		Acesso:                     "NECESSITA_SIMULACAO_USUARIO",
 		Extensao:                   "XLS",
 		EstritamenteTabular:        true,
@@ -95,6 +96,7 @@ func TestNewResultadoColetaCSV(t *testing.T) {
 		Metadados: &coleta.Metadados{
 			NaoRequerLogin:      true,
 			NaoRequerCaptcha:    true,
+			FormatoAberto:       false,
 			Acesso:              coleta.Metadados_NECESSITA_SIMULACAO_USUARIO,
 			Extensao:            coleta.Metadados_XLS,
 			EstritamenteTabular: true,

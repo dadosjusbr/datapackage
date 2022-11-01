@@ -285,6 +285,14 @@ var metadadosResource = Resource{
 				Constraints:     Constraints{Required: true},
 			},
 			{
+				Name:            "formato_aberto",
+				Type:            "boolean",
+				Title:           "Formato Aberto",
+				Description:     "Is the data available in an open format?",
+				DescriptionPTBR: "Os dados são disponibilizados em formato aberto?",
+				Constraints:     Constraints{Required: true},
+			},
+			{
 				Name:            "acesso",
 				Type:            "string",
 				Format:          "default",
