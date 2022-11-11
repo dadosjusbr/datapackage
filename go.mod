@@ -3,7 +3,7 @@ module github.com/dadosjusbr/datapackage
 go 1.17
 
 require (
-	github.com/dadosjusbr/proto v0.0.0-20220304160723-47e93e9d97b5
+	github.com/dadosjusbr/proto v0.0.0-20221111143805-a41e9c57346c
 	github.com/frictionlessdata/datapackage-go v1.0.4
 	github.com/frictionlessdata/tableschema-go v1.1.4-0.20220401172006-6cc5f3b2411c
 	github.com/gocarina/gocsv v0.0.0-20220310154401-d4df709ca055
@@ -13,6 +13,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/santhosh-tekuri/jsonschema v1.2.4 // indirect

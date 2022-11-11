@@ -269,19 +269,11 @@ var metadadosResource = Resource{
 				Constraints:     Constraints{Required: true},
 			},
 			{
-				Name:            "nao_requer_login",
+				Name:            "formato_aberto",
 				Type:            "boolean",
-				Title:           "Não Requer Login",
-				Description:     "Does the data collection need login?",
-				DescriptionPTBR: "É necessário login para coleta dos dados?",
-				Constraints:     Constraints{Required: true},
-			},
-			{
-				Name:            "nao_requer_captcha",
-				Type:            "boolean",
-				Title:           "Não Requer Captcha",
-				Description:     "Does the data collection need captcha?",
-				DescriptionPTBR: "É necessário captcha para coleta dos dados?",
+				Title:           "Formato Aberto",
+				Description:     "Is the data available in an open format?",
+				DescriptionPTBR: "Os dados são disponibilizados em formato aberto?",
 				Constraints:     Constraints{Required: true},
 			},
 			{
