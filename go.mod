@@ -3,7 +3,7 @@ module github.com/dadosjusbr/datapackage
 go 1.17
 
 require (
-	github.com/dadosjusbr/proto v0.0.0-20221111143805-a41e9c57346c
+	github.com/dadosjusbr/proto v0.0.0-20221212025627-91c60aa3cd12
 	github.com/frictionlessdata/datapackage-go v1.0.4
 	github.com/frictionlessdata/tableschema-go v1.1.4-0.20220401172006-6cc5f3b2411c
 	github.com/gocarina/gocsv v0.0.0-20220310154401-d4df709ca055
