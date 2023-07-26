@@ -3,6 +3,7 @@ package datapackage
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 
@@ -23,7 +24,8 @@ const (
 	metadadosResourceName    = "metadados"         // hardcoded in datapackage_descriptor.json
 )
 
-func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
+// Essa versão não é mais utilizada desde julho de 2023.
+func NewResultadoColetaCSV_V1(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
 	var coleta Coleta_CSV
 	var remuneracoes []Remuneracao_CSV
 	var folha []ContraCheque_CSV
@@ -85,7 +87,89 @@ func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV {
 	}
 }
 
-func Zip(outputPath string, rc ResultadoColeta_CSV, cleanup bool) error {
+// Essa versão passou a ser utilizada a partir de julho de 2023
+func NewResultadoColetaCSV(rc *coleta.ResultadoColeta) ResultadoColeta_CSV_V2 {
+	var coletaCSV Coleta_CSV_V2
+	var remuneracoes []Remuneracao_CSV_V2
+	var folha []ContraCheque_CSV_V2
+
+	coletaCSV.ChaveColeta = rc.Coleta.ChaveColeta
+	coletaCSV.Orgao = rc.Coleta.Orgao
+	coletaCSV.Mes = rc.Coleta.Mes
+	coletaCSV.Ano = rc.Coleta.Ano
+	coletaCSV.TimestampColeta = rc.Coleta.TimestampColeta.AsTime()
+	coletaCSV.RepositorioColetor = rc.Coleta.RepositorioColetor
+	coletaCSV.VersaoColetor = rc.Coleta.VersaoColetor
+	coletaCSV.RepositorioParser = rc.Coleta.RepositorioParser
+	coletaCSV.VersaoParser = rc.Coleta.VersaoParser
+
+	var metadados Metadados_CSV_V2
+	metadados.Orgao = rc.Coleta.Orgao
+	metadados.Mes = rc.Coleta.Mes
+	metadados.Ano = rc.Coleta.Ano
+	metadados.FormatoAberto = rc.Metadados.FormatoAberto
+	metadados.Acesso = rc.Metadados.Acesso.String()
+	metadados.Extensao = rc.Metadados.Extensao.String()
+	metadados.EstritamenteTabular = rc.Metadados.EstritamenteTabular
+	metadados.FormatoConsistente = rc.Metadados.FormatoConsistente
+	metadados.TemMatricula = rc.Metadados.TemMatricula
+	metadados.TemLotacao = rc.Metadados.TemLotacao
+	metadados.TemCargo = rc.Metadados.TemCargo
+	metadados.DetalhamentoReceitaBase = rc.Metadados.ReceitaBase.String()
+	metadados.DetalhamentoOutrasReceitas = rc.Metadados.OutrasReceitas.String()
+	metadados.DetalhamentoDescontos = rc.Metadados.Despesas.String()
+	metadados.IndiceCompletude = rc.Metadados.IndiceCompletude
+	metadados.IndiceFacilidade = rc.Metadados.IndiceFacilidade
+	metadados.IndiceTransparencia = rc.Metadados.IndiceTransparencia
+
+	for i, v := range rc.Folha.ContraCheque {
+		var contraCheque ContraCheque_CSV_V2
+		contraCheque.IdContraCheque = i + 1
+		contraCheque.Orgao = rc.Coleta.Orgao
+		contraCheque.Mes = rc.Coleta.Mes
+		contraCheque.Ano = rc.Coleta.Ano
+		contraCheque.Nome = v.Nome
+		contraCheque.Matricula = v.Matricula
+		contraCheque.Funcao = v.Funcao
+		contraCheque.LocalTrabalho = v.LocalTrabalho
+		var salario, beneficios, descontos float64
+		for _, k := range v.Remuneracoes.Remuneracao {
+			var remuneracao Remuneracao_CSV_V2
+			remuneracao.IdContraCheque = i + 1
+			remuneracao.Orgao = rc.Coleta.Orgao
+			remuneracao.Mes = rc.Coleta.Mes
+			remuneracao.Ano = rc.Coleta.Ano
+			remuneracao.Categoria = k.Categoria
+			remuneracao.Item = k.Item
+			remuneracao.Valor = k.Valor
+			if k.TipoReceita == coleta.Remuneracao_B && k.Natureza == coleta.Remuneracao_R {
+				salario += k.Valor
+				remuneracao.Tipo = "R/B"
+			} else if k.TipoReceita == coleta.Remuneracao_O && k.Natureza == coleta.Remuneracao_R {
+				beneficios += k.Valor
+				remuneracao.Tipo = "R/O"
+			} else if k.Natureza == coleta.Remuneracao_D {
+				descontos += math.Abs(k.Valor)
+				remuneracao.Tipo = "D"
+			}
+			remuneracoes = append(remuneracoes, remuneracao)
+		}
+		contraCheque.Salario = salario
+		contraCheque.Beneficios = beneficios
+		contraCheque.Descontos = descontos
+		contraCheque.Remuneracao = salario + beneficios - descontos
+		folha = append(folha, contraCheque)
+	}
+
+	return ResultadoColeta_CSV_V2{
+		Coleta:       append([]Coleta_CSV_V2{}, coletaCSV),
+		Remuneracoes: remuneracoes,
+		Folha:        folha,
+		Metadados:    append([]Metadados_CSV_V2{}, metadados),
+	}
+}
+
+func Zip(outputPath string, rc ResultadoColeta_CSV_V2, cleanup bool) error {
 	outDir := filepath.Dir(outputPath)
 	coletaCSVPath := filepath.Join(outDir, coletaFileName)
 	folhaCSVPath := filepath.Join(outDir, contrachequeFileName)
@@ -148,49 +232,49 @@ func descriptorMap() (map[string]interface{}, error) {
 	return desc, nil
 }
 
-func Load(path string) (ResultadoColeta_CSV, error) {
+func Load(path string) (ResultadoColeta_CSV_V2, error) {
 	pkg, err := datapackage.Load(path, validator.InMemoryLoader())
 	if err != nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("error loading datapackage (%s):%q", path, err)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("error loading datapackage (%s):%q", path, err)
 	}
 
 	coleta := pkg.GetResource(coletaResourceName)
 	if coleta == nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("resource coleta not found in package %s", path)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("resource coleta not found in package %s", path)
 	}
-	var coleta_CSV []Coleta_CSV
+	var coleta_CSV []Coleta_CSV_V2
 	if err := coleta.Cast(&coleta_CSV, csv.LoadHeaders()); err != nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("failed to cast Coleta_CSV: %s", err)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("failed to cast Coleta_CSV: %s", err)
 	}
 
 	contracheque := pkg.GetResource(contrachequeResourceName)
 	if contracheque == nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("resource contra_cheque not found in package %s", path)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("resource contra_cheque not found in package %s", path)
 	}
-	var contracheque_CSV []ContraCheque_CSV
+	var contracheque_CSV []ContraCheque_CSV_V2
 	if err := contracheque.Cast(&contracheque_CSV, csv.LoadHeaders()); err != nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("failed to cast ContraCheque_CSV: %s", err)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("failed to cast ContraCheque_CSV: %s", err)
 	}
 
 	remuneracao := pkg.GetResource(remuneracaoResourceName)
 	if remuneracao == nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("resource remuneracao not found in package %s", path)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("resource remuneracao not found in package %s", path)
 	}
-	var remuneracao_CSV []Remuneracao_CSV
+	var remuneracao_CSV []Remuneracao_CSV_V2
 	if err := remuneracao.Cast(&remuneracao_CSV, csv.LoadHeaders()); err != nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("failed to cast Remuneracao_CSV: %s", err)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("failed to cast Remuneracao_CSV: %s", err)
 	}
 
 	metadados := pkg.GetResource(metadadosResourceName)
 	if metadados == nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("resource metadados not found in package %s", path)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("resource metadados not found in package %s", path)
 	}
-	var metadados_CSV []Metadados_CSV
+	var metadados_CSV []Metadados_CSV_V2
 	if err := metadados.Cast(&metadados_CSV, csv.LoadHeaders()); err != nil {
-		return ResultadoColeta_CSV{}, fmt.Errorf("failed to cast Metadados_CSV: %s", err)
+		return ResultadoColeta_CSV_V2{}, fmt.Errorf("failed to cast Metadados_CSV: %s", err)
 	}
 
-	return ResultadoColeta_CSV{
+	return ResultadoColeta_CSV_V2{
 		Coleta:       coleta_CSV,
 		Remuneracoes: remuneracao_CSV,
 		Folha:        contracheque_CSV,
