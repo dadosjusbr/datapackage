@@ -25,8 +25,8 @@ var (
 		RepositorioParser:  "https://github.com/dadosjusbr/parser-cnj",
 		VersaoParser:       "unspecified",
 	}
-	contraChequeTest = ContraCheque_CSV_V2{
-		IdContraCheque: 1,
+	contrachequeTest = Contracheque_CSV_V2{
+		IdContracheque: 1,
 		Orgao:          "tjal",
 		Mes:            2,
 		Ano:            2020,
@@ -54,7 +54,7 @@ var (
 		IndiceTransparencia:        0.8,
 	}
 	remuneracaoTest = Remuneracao_CSV_V2{
-		IdContraCheque: 1,
+		IdContracheque: 1,
 		Orgao:          "tjal",
 		Mes:            2,
 		Ano:            2020,
@@ -65,7 +65,7 @@ var (
 	}
 	resultadoColeta = ResultadoColeta_CSV_V2{
 		Coleta:       []Coleta_CSV_V2{coletaTest},
-		Folha:        []ContraCheque_CSV_V2{contraChequeTest},
+		Folha:        []Contracheque_CSV_V2{contrachequeTest},
 		Metadados:    []Metadados_CSV_V2{metadadosTest},
 		Remuneracoes: []Remuneracao_CSV_V2{remuneracaoTest},
 	}
@@ -118,11 +118,11 @@ func TestNewResultadoColetaCSV(t *testing.T) {
 			IndiceTransparencia: 0.8,
 		},
 	}
-	assert.Equal(t, resultadoColeta, NewResultadoColetaCSV(&in))
+	assert.Equal(t, resultadoColeta, NewResultadoColetaCSV_V2(&in))
 }
 
 func TestLoad_Success(t *testing.T) {
-	rc, err := Load("test_datapackage_load.zip")
+	rc, err := LoadV2("test_datapackage_load.zip")
 	assert.NoError(t, err, "want no erro on Load")
 
 	t.Run("CheckColeta", func(t *testing.T) {
@@ -130,9 +130,9 @@ func TestLoad_Success(t *testing.T) {
 		assert.Equal(t, coletaTest, rc.Coleta[0])
 	})
 
-	t.Run("CheckContraCheque", func(t *testing.T) {
+	t.Run("CheckContracheque", func(t *testing.T) {
 		assert.Equal(t, 214, len(rc.Folha))
-		assert.Equal(t, contraChequeTest, rc.Folha[0])
+		assert.Equal(t, contrachequeTest, rc.Folha[0])
 	})
 
 	t.Run("CheckMetadados", func(t *testing.T) {
@@ -145,31 +145,6 @@ func TestLoad_Success(t *testing.T) {
 		assert.Equal(t, remuneracaoTest, rc.Remuneracoes[0])
 	})
 }
-
-// func TestLoad_Remote(t *testing.T) {
-// 	rc, err := Load("https://github.com/dadosjusbr/datapackage/raw/main/test_datapackage_load.zip")
-// 	assert.NoError(t, err, "want no erro on Load")
-
-// 	t.Run("CheckColeta", func(t *testing.T) {
-// 		assert.Equal(t, 1, len(rc.Coleta))
-// 		assert.Equal(t, coletaTest, rc.Coleta[0])
-// 	})
-
-// 	t.Run("CheckContraCheque", func(t *testing.T) {
-// 		assert.Equal(t, 214, len(rc.Folha))
-// 		assert.Equal(t, contraChequeTest, rc.Folha[0])
-// 	})
-
-// 	t.Run("CheckMetadados", func(t *testing.T) {
-// 		assert.Equal(t, 1, len(rc.Metadados))
-// 		assert.Equal(t, metadadosTest, rc.Metadados[0])
-// 	})
-
-// 	t.Run("CheckRemuneracao", func(t *testing.T) {
-// 		assert.Equal(t, 5354, len(rc.Remuneracoes))
-// 		assert.Equal(t, remuneracaoTest, rc.Remuneracoes[0])
-// 	})
-// }
 
 func TestLoad_Error(t *testing.T) {
 	testData := []struct {
@@ -184,13 +159,13 @@ func TestLoad_Error(t *testing.T) {
 	}
 	for _, d := range testData {
 		t.Run(d.desc, func(t *testing.T) {
-			_, err := Load(d.path)
+			_, err := LoadV2(d.path)
 			assert.Error(t, err)
 		})
 	}
 }
 func TestZip_Success(t *testing.T) {
-	assert.NoError(t, Zip("datapackage_criado.zip", resultadoColeta, false), "want no err during Zip")
+	assert.NoError(t, ZipV2("datapackage_criado.zip", resultadoColeta, false), "want no err during Zip")
 	defer func() {
 		os.Remove(coletaFileName)
 		os.Remove(contrachequeFileName)
@@ -206,11 +181,11 @@ func TestZip_Success(t *testing.T) {
 			assert.Equal(t, 1, len(got))
 			assert.Equal(t, coletaTest, got[0])
 		})
-		t.Run("ContraCheque", func(t *testing.T) {
-			var got []ContraCheque_CSV_V2
-			assert.NoError(t, fromCSVFile(&got, contrachequeFileName), "want no err during retrieving folha csv")
+		t.Run("Contracheque", func(t *testing.T) {
+			var got []Contracheque_CSV_V2
+			assert.NoError(t, fromCSVFile(&got, contrachequeFileNameV2), "want no err during retrieving folha csv")
 			assert.Equal(t, 1, len(got))
-			assert.Equal(t, contraChequeTest, got[0])
+			assert.Equal(t, contrachequeTest, got[0])
 		})
 
 		t.Run("Metadados", func(t *testing.T) {
@@ -235,10 +210,10 @@ func TestZip_Success(t *testing.T) {
 			resName   string
 			numFields int
 		}{
-			{coletaResourceName, len(coletaResource.Schema.Fields)},
-			{contrachequeResourceName, len(contraChequeResource.Schema.Fields)},
-			{remuneracaoResourceName, len(remuneracaoResource.Schema.Fields)},
-			{metadadosResourceName, len(metadadosResource.Schema.Fields)},
+			{coletaResourceName, len(coletaResourceV2.Schema.Fields)},
+			{contrachequeResourceNameV2, len(contraChequeResourceV2.Schema.Fields)},
+			{remuneracaoResourceName, len(remuneracaoResourceV2.Schema.Fields)},
+			{metadadosResourceName, len(metadadosResourceV2.Schema.Fields)},
 		}
 		for _, data := range resNames {
 			t.Run(data.resName, func(t *testing.T) {
