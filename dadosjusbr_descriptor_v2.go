@@ -6,7 +6,7 @@ package datapackage
 var dadosjusbrDescriptorV2 = dadosjusbrDescriptorStruct{
 	Name:         "remuneracoes-jusbr",
 	Title:        "Remunerações do Sistema de Justiça Brasileiro",
-	Description:  "Remunerações do Sistema de Justiça Brasileiro libertadas por DadosJusBR",
+	Description:  "Remunerações do Sistema de Justiça Brasileiro libertadas por DadosJusBR. Para mais informações sobre o pacote de dados, acesse: http://dadosjusbr.org/pacotes-de-dados",
 	Profile:      "tabular-data-package",
 	Homepage:     "https://dadosjusbr.org",
 	Version:      "2.0.0",
@@ -284,19 +284,9 @@ var remuneracaoResourceV2 = Resource{
 				Type:            "string",
 				Format:          "default",
 				Title:           "Tipo",
-				Description:     "Describes whether it is an income (base or other remuneration) or a discount.",
-				DescriptionPTBR: "Descreve se é um rendimento (base ou outras remunerações) ou um desconto.",
+				Description:     "Describes whether it is an income (base or other remuneration) or a discount. For more information, access: http://dadosjusbr.org/pacotes-de-dados",
+				DescriptionPTBR: "Descreve se é um rendimento (base ou outras remunerações) ou um desconto. Para mais informações, acesse: http://dadosjusbr.org/pacotes-de-dados",
 				Constraints:     Constraints{Required: true},
-				Enum: map[string]string{
-					"R/B": "base type income, salary;",
-					"R/O": "income from other compensation, benefits;",
-					"D":   "discounts.",
-				},
-				EnumPTBR: map[string]string{
-					"R/B": "rendimento do tipo base, salário;",
-					"R/O": "rendimento de outras remunerações, benefícios;",
-					"D":   "descontos.",
-				},
 			},
 			{
 				Name:            "categoria",
