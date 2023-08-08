@@ -1,23 +1,19 @@
 package datapackage
 
 import (
-	"fmt"
-	"os"
 	"time"
-
-	"github.com/gocarina/gocsv"
 )
 
-// Essa versão deixou de ser utilizada em julho de 2023
-type ResultadoColeta_CSV struct {
-	Coleta       []Coleta_CSV
-	Remuneracoes []Remuneracao_CSV
-	Folha        []ContraCheque_CSV
-	Metadados    []Metadados_CSV
+// *_V2: Essa versão passou a ser utilizada a partir de julho de 2023
+type ResultadoColeta_CSV_V2 struct {
+	Coleta       []Coleta_CSV_V2
+	Remuneracoes []Remuneracao_CSV_V2
+	Folha        []Contracheque_CSV_V2
+	Metadados    []Metadados_CSV_V2
 }
 
-// Essa versão deixou de ser utilizada em julho de 2023
-type Coleta_CSV struct {
+// *_V2: Essa versão passou a ser utilizada a partir de julho de 2023
+type Coleta_CSV_V2 struct {
 	ChaveColeta        string    `csv:"chave_coleta" tableheader:"chave_coleta"`
 	Orgao              string    `csv:"orgao" tableheader:"orgao"`
 	Mes                int32     `csv:"mes" tableheader:"mes"`
@@ -25,24 +21,32 @@ type Coleta_CSV struct {
 	TimestampColeta    time.Time `csv:"timestamp_coleta" tableheader:"timestamp_coleta"`
 	RepositorioColetor string    `csv:"repositorio_coletor" tableheader:"repositorio_coletor"`
 	VersaoColetor      string    `csv:"versao_coletor" tableheader:"versao_coletor"`
-	DirColetor         string    `csv:"dir_coletor" tableheader:"dir_coletor"`
+	RepositorioParser  string    `csv:"repositorio_parser" tableheader:"repositorio_parser"`
+	VersaoParser       string    `csv:"versao_parser" tableheader:"versao_parser"`
 }
 
-// Essa versão deixou de ser utilizada em julho de 2023
-type ContraCheque_CSV struct {
-	IdContraCheque string `csv:"id_contra_cheque" tableheader:"id_contra_cheque"`
-	ChaveColeta    string `csv:"chave_coleta" tableheader:"chave_coleta"`
-	Nome           string `csv:"nome" tableheader:"nome"`
-	Matricula      string `csv:"matricula" tableheader:"matricula"`
-	Funcao         string `csv:"funcao" tableheader:"funcao"`
-	LocalTrabalho  string `csv:"local_trabalho" tableheader:"local_trabalho"`
-	Tipo           string `csv:"tipo" tableheader:"tipo"`
-	Ativo          bool   `csv:"ativo" tableheader:"ativo"`
+// *_V2: Essa versão passou a ser utilizada a partir de julho de 2023
+type Contracheque_CSV_V2 struct {
+	IdContracheque int     `csv:"id_contracheque" tableheader:"id_contracheque"`
+	Orgao          string  `csv:"orgao" tableheader:"orgao"`
+	Mes            int32   `csv:"mes" tableheader:"mes"`
+	Ano            int32   `csv:"ano" tableheader:"ano"`
+	Nome           string  `csv:"nome" tableheader:"nome"`
+	Matricula      string  `csv:"matricula" tableheader:"matricula"`
+	Funcao         string  `csv:"funcao" tableheader:"funcao"`
+	LocalTrabalho  string  `csv:"local_trabalho" tableheader:"local_trabalho"`
+	Salario        float64 `csv:"salario" tableheader:"salario"`
+	Beneficios     float64 `csv:"beneficios" tableheader:"beneficios"`
+	Descontos      float64 `csv:"descontos" tableheader:"descontos"`
+	Remuneracao    float64 `csv:"remuneracao" tableheader:"remuneracao"`
+	Situacao       string  `csv:"situacao" tableheader:"situacao"`
 }
 
-// Essa versão deixou de ser utilizada em julho de 2023
-type Metadados_CSV struct {
-	ChaveColeta                string  `csv:"chave_coleta" tableheader:"chave_coleta"`
+// *_V2: Essa versão passou a ser utilizada a partir de julho de 2023
+type Metadados_CSV_V2 struct {
+	Orgao                      string  `csv:"orgao" tableheader:"orgao"`
+	Mes                        int32   `csv:"mes" tableheader:"mes"`
+	Ano                        int32   `csv:"ano" tableheader:"ano"`
 	FormatoAberto              bool    `csv:"formato_aberto" tableheader:"formato_aberto"`                             // Os dados são disponibilizados em formato aberto?
 	Acesso                     string  `csv:"acesso" tableheader:"acesso"`                                             // Conseguimos prever/construir uma URL com base no órgão/mês/ano que leve ao download do dado?
 	Extensao                   string  `csv:"extensao" tableheader:"extensao"`                                         // Extensao do arquivo de dados, ex: CSV, JSON, XLS, etc
@@ -59,31 +63,14 @@ type Metadados_CSV struct {
 	IndiceTransparencia        float32 `csv:"indice_transparencia" tableheader:"indice_transparencia"`                 // Nota final, calculada utilizada os componentes de disponibilidade e dificuldade.
 }
 
-// Essa versão deixou de ser utilizada em julho de 2023
-type Remuneracao_CSV struct {
-	IdContraCheque string  `csv:"id_contra_cheque" tableheader:"id_contra_cheque"`
-	ChaveColeta    string  `csv:"chave_coleta" tableheader:"chave_coleta"`
-	Natureza       string  `csv:"natureza" tableheader:"natureza"`
+// *_V2: Essa versão passou a ser utilizada a partir de julho de 2023
+type Remuneracao_CSV_V2 struct {
+	IdContracheque int     `csv:"id_contracheque" tableheader:"id_contracheque"`
+	Orgao          string  `csv:"orgao" tableheader:"orgao"`
+	Mes            int32   `csv:"mes" tableheader:"mes"`
+	Ano            int32   `csv:"ano" tableheader:"ano"`
+	Tipo           string  `csv:"tipo" tableheader:"tipo"`
 	Categoria      string  `csv:"categoria" tableheader:"categoria"`
 	Item           string  `csv:"item" tableheader:"item"`
 	Valor          float64 `csv:"valor" tableheader:"valor"`
-}
-
-// toCSVFile dumps the payroll into a file using the CSV format.
-func toCSVFile(in interface{}, path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("error creating CSV file(%s):%q", path, err)
-	}
-	defer f.Close()
-	return gocsv.MarshalFile(in, f)
-}
-
-// fromCSVFile gets from CSV to a certain struct.
-func fromCSVFile(in interface{}, path string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	return gocsv.UnmarshalFile(f, in)
 }
