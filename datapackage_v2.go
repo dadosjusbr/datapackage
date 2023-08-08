@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dadosjusbr/proto/coleta"
 	"github.com/frictionlessdata/datapackage-go/datapackage"
@@ -89,6 +90,11 @@ func NewResultadoColetaCSV_V2(rc *coleta.ResultadoColeta) ResultadoColeta_CSV_V2
 		contraCheque.Beneficios = beneficios
 		contraCheque.Descontos = descontos
 		contraCheque.Remuneracao = salario + beneficios - descontos
+
+		if v.Ativo && strings.Contains(rc.Coleta.Orgao, "mp") {
+			contraCheque.Situacao = "A"
+		}
+
 		folha = append(folha, contraCheque)
 	}
 

@@ -226,6 +226,15 @@ var contraChequeResourceV2 = Resource{
 				DescriptionPTBR: "Remuneração do membro",
 				Constraints:     Constraints{Required: true},
 			},
+			{
+				Name:            "situacao",
+				Type:            "string",
+				Format:          "default",
+				Title:           "Situação",
+				Description:     "Public servant situation",
+				DescriptionPTBR: "Situação do membro",
+				Constraints:     Constraints{Required: false},
+			},
 		},
 	},
 }

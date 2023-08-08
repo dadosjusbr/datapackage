@@ -39,6 +39,7 @@ type Contracheque_CSV_V2 struct {
 	Beneficios     float64 `csv:"beneficios" tableheader:"beneficios"`
 	Descontos      float64 `csv:"descontos" tableheader:"descontos"`
 	Remuneracao    float64 `csv:"remuneracao" tableheader:"remuneracao"`
+	Situacao       string  `csv:"situacao" tableheader:"situacao"`
 }
 
 // *_V2: Essa versão passou a ser utilizada a partir de julho de 2023
