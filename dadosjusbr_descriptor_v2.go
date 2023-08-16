@@ -115,7 +115,6 @@ var contraChequeResourceV2 = Resource{
 	Path:        contrachequeFileNameV2,
 	Profile:     "tabular-data-resource",
 	Schema: Schema{
-		PrimaryKey: "id_contracheque",
 		ForeignKeys: []ForeignKey{
 			{"orgao", FKRef{coletaResourceName, "orgao"}},
 			{"mes", FKRef{coletaResourceName, "mes"}},
