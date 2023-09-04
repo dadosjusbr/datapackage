@@ -143,7 +143,7 @@ func ZipV2(outputPath string, rc ResultadoColeta_CSV_V2, cleanup bool) error {
 	}
 
 	// Creating datapackage
-	desc, err := descriptorMapV2()
+	desc, err := DescriptorMapV2()
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func ZipV2(outputPath string, rc ResultadoColeta_CSV_V2, cleanup bool) error {
 	return nil
 }
 
-func descriptorMapV2() (map[string]interface{}, error) {
+func DescriptorMapV2() (map[string]interface{}, error) {
 	b, err := json.Marshal(dadosjusbrDescriptorV2)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling dadosjusbr descriptor:%w", err)
