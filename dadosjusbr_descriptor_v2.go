@@ -21,6 +21,9 @@ var coletaResourceV2 = Resource{
 	Description: "Descreve a coleta e o coletor de um determinado órgão, mês e ano.",
 	Path:        coletaFileName,
 	Profile:     "tabular-data-resource",
+	Dialect: Dialect{
+		Delimiter: ";",
+	},
 	Schema: Schema{
 		PrimaryKey: "chave_coleta",
 		Fields: []Field{
@@ -114,6 +117,9 @@ var contraChequeResourceV2 = Resource{
 	Description: "Descreve os contracheques associados a uma determinada coleta (mês, ano, órgão)",
 	Path:        contrachequeFileNameV2,
 	Profile:     "tabular-data-resource",
+	Dialect: Dialect{
+		Delimiter: ";",
+	},
 	Schema: Schema{
 		ForeignKeys: []ForeignKey{
 			{"orgao", FKRef{coletaResourceName, "orgao"}},
@@ -197,6 +203,7 @@ var contraChequeResourceV2 = Resource{
 				Description:     "Public servant payroll salary",
 				DescriptionPTBR: "Salário base no contracheque do membro",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 			{
 				Name:            "beneficios",
@@ -206,6 +213,7 @@ var contraChequeResourceV2 = Resource{
 				Description:     "Public servant payroll benefits",
 				DescriptionPTBR: "Benefícios no contracheque do membro",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 			{
 				Name:            "descontos",
@@ -215,6 +223,7 @@ var contraChequeResourceV2 = Resource{
 				Description:     "Public servant payroll discounts",
 				DescriptionPTBR: "Descontos no contracheque do membro",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 			{
 				Name:            "remuneracao",
@@ -224,6 +233,7 @@ var contraChequeResourceV2 = Resource{
 				Description:     "Public servant remuneration",
 				DescriptionPTBR: "Remuneração do membro",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 			{
 				Name:            "situacao",
@@ -243,6 +253,9 @@ var remuneracaoResourceV2 = Resource{
 	Description: "Detalha as remunerações associadas aos contracheques de uma determinada coleta (mês, ano, órgão)",
 	Path:        remuneracaoFileName,
 	Profile:     "tabular-data-resource",
+	Dialect: Dialect{
+		Delimiter: ";",
+	},
 	Schema: Schema{
 		ForeignKeys: []ForeignKey{
 			{"id_contracheque", FKRef{contrachequeResourceName, "id_contracheque"}},
@@ -321,6 +334,7 @@ var remuneracaoResourceV2 = Resource{
 				Description:     "Value associated to the remuneration item",
 				DescriptionPTBR: "Valor associado ao item de remuneração",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 		},
 	},
@@ -331,6 +345,9 @@ var metadadosResourceV2 = Resource{
 	Description: "Metadados associados a uma determinada coleta (mês, ano, órgão), incluindo o índice de transparência DadosJusBR.",
 	Path:        metadadosFileName,
 	Profile:     "tabular-data-resource",
+	Dialect: Dialect{
+		Delimiter: ";",
+	},
 	Schema: Schema{
 		ForeignKeys: []ForeignKey{
 			{"orgao", FKRef{coletaResourceName, "orgao"}},
@@ -466,6 +483,7 @@ var metadadosResourceV2 = Resource{
 				Description:     "DadosJusBR Transparency Index Component which results from metadata related to data availability",
 				DescriptionPTBR: "Componente do índice de transparência resultante da análise dos metadados relacionados a disponibilidade dos dados",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 			{
 				Name:            "indice_facilidade",
@@ -475,6 +493,7 @@ var metadadosResourceV2 = Resource{
 				Description:     "DadosJusBR Transparency Index Component which results from metadata related to how easy is to access the data",
 				DescriptionPTBR: "Componente do índice de transparência resultante da análise dos metadados relacionados a dificuldade para acessar os dados que estão disponíveis",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 			{
 				Name:            "indice_transparencia",
@@ -484,6 +503,7 @@ var metadadosResourceV2 = Resource{
 				Description:     "DadosJusBR Transparency Score, calculated from the availability and access components",
 				DescriptionPTBR: "Nota final, calculada utilizada os componentes de disponibilidade e dificuldade",
 				Constraints:     Constraints{Required: true},
+				DecimalChar:     ",",
 			},
 		},
 	},
