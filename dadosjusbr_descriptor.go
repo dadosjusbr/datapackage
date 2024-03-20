@@ -423,6 +423,7 @@ type Field struct {
 	BareNumber      bool              `json:"bareNumber,omitempty"`
 	Enum            map[string]string `json:"enum,omitempty"`
 	EnumPTBR        map[string]string `json:"enum-ptbr,omitempty"`
+	DecimalChar     string            `json:"decimalChar,omitempty"`
 }
 
 type Schema struct {
@@ -432,11 +433,16 @@ type Schema struct {
 }
 
 type Resource struct {
-	Name        string `json:"name,omitempty"`
-	Path        string `json:"path,omitempty"`
-	Profile     string `json:"profile,omitempty"`
-	Description string `json:"description,omitempty"`
-	Schema      Schema `json:"schema,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Path        string  `json:"path,omitempty"`
+	Profile     string  `json:"profile,omitempty"`
+	Description string  `json:"description,omitempty"`
+	Schema      Schema  `json:"schema,omitempty"`
+	Dialect     Dialect `json:"dialect,omitempty"`
+}
+
+type Dialect struct {
+	Delimiter string `json:"delimiter,omitempty"`
 }
 
 type Contributor struct {

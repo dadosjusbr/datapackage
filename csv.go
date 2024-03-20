@@ -1,6 +1,7 @@
 package datapackage
 
 import (
+	"encoding/csv"
 	"fmt"
 	"os"
 	"time"
@@ -76,7 +77,13 @@ func toCSVFile(in interface{}, path string) error {
 		return fmt.Errorf("error creating CSV file(%s):%q", path, err)
 	}
 	defer f.Close()
-	return gocsv.MarshalFile(in, f)
+
+	// Cria um novo escritor CSV com o separador de colunas personalizado
+	csvWriter := csv.NewWriter(f)
+	csvWriter.Comma = ';'
+	csvWriter.UseCRLF = true // Para garantir que os fins de linha estejam no formato correto
+
+	return gocsv.MarshalCSV(in, csvWriter)
 }
 
 // fromCSVFile gets from CSV to a certain struct.
@@ -85,5 +92,9 @@ func fromCSVFile(in interface{}, path string) error {
 	if err != nil {
 		return err
 	}
-	return gocsv.UnmarshalFile(f, in)
+	// Cria um leitor CSV com o separador de colunas personalizado
+	csvReader := csv.NewReader(f)
+	csvReader.Comma = ';'
+
+	return gocsv.UnmarshalCSV(csvReader, in)
 }

@@ -50,9 +50,9 @@ func NewResultadoColetaCSV_V2(rc *coleta.ResultadoColeta) ResultadoColeta_CSV_V2
 	metadados.DetalhamentoReceitaBase = rc.Metadados.ReceitaBase.String()
 	metadados.DetalhamentoOutrasReceitas = rc.Metadados.OutrasReceitas.String()
 	metadados.DetalhamentoDescontos = rc.Metadados.Despesas.String()
-	metadados.IndiceCompletude = rc.Metadados.IndiceCompletude
-	metadados.IndiceFacilidade = rc.Metadados.IndiceFacilidade
-	metadados.IndiceTransparencia = rc.Metadados.IndiceTransparencia
+	metadados.IndiceCompletude = CustomFloat32(rc.Metadados.IndiceCompletude)
+	metadados.IndiceFacilidade = CustomFloat32(rc.Metadados.IndiceFacilidade)
+	metadados.IndiceTransparencia = CustomFloat32(rc.Metadados.IndiceTransparencia)
 
 	for i, v := range rc.Folha.ContraCheque {
 		var contraCheque Contracheque_CSV_V2
@@ -73,7 +73,7 @@ func NewResultadoColetaCSV_V2(rc *coleta.ResultadoColeta) ResultadoColeta_CSV_V2
 			remuneracao.Ano = rc.Coleta.Ano
 			remuneracao.Categoria = k.Categoria
 			remuneracao.Item = k.Item
-			remuneracao.Valor = k.Valor
+			remuneracao.Valor = CustomFloat32(k.Valor)
 			if k.TipoReceita == coleta.Remuneracao_B && k.Natureza == coleta.Remuneracao_R {
 				salario += k.Valor
 				remuneracao.Tipo = "R/B"
@@ -86,10 +86,10 @@ func NewResultadoColetaCSV_V2(rc *coleta.ResultadoColeta) ResultadoColeta_CSV_V2
 			}
 			remuneracoes = append(remuneracoes, remuneracao)
 		}
-		contraCheque.Salario = salario
-		contraCheque.Beneficios = beneficios
-		contraCheque.Descontos = descontos
-		contraCheque.Remuneracao = salario + beneficios - descontos
+		contraCheque.Salario = CustomFloat32(salario)
+		contraCheque.Beneficios = CustomFloat32(beneficios)
+		contraCheque.Descontos = CustomFloat32(descontos)
+		contraCheque.Remuneracao = CustomFloat32(salario + beneficios - descontos)
 
 		if v.Ativo && strings.Contains(rc.Coleta.Orgao, "mp") {
 			contraCheque.Situacao = "A"
