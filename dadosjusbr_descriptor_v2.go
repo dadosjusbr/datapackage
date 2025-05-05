@@ -336,6 +336,22 @@ var remuneracaoResourceV2 = Resource{
 				Constraints:     Constraints{Required: true},
 				DecimalChar:     ",",
 			},
+			{
+				Name:            "desambiguacao_micro",
+				Type:            "string",
+				Format:          "default",
+				Title:           "Desambiguacao micro",
+				Description:     "Description of the remuneration item",
+				DescriptionPTBR: "Descrição do ítem de remuneração",
+			},
+			{
+				Name:            "desambiguacao_macro",
+				Type:            "string",
+				Format:          "default",
+				Title:           "Desambiguacao macro",
+				Description:     "Specific category grouping items with the same meaning or purpose.",
+				DescriptionPTBR: "Categoria específica que agrupa itens com o mesmo significado ou finalidade",
+			},
 		},
 	},
 }

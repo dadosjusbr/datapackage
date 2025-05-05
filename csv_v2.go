@@ -67,14 +67,16 @@ type Metadados_CSV_V2 struct {
 
 // *_V2: Essa versão passou a ser utilizada a partir de julho de 2023
 type Remuneracao_CSV_V2 struct {
-	IdContracheque int           `csv:"id_contracheque" tableheader:"id_contracheque"`
-	Orgao          string        `csv:"orgao" tableheader:"orgao"`
-	Mes            int32         `csv:"mes" tableheader:"mes"`
-	Ano            int32         `csv:"ano" tableheader:"ano"`
-	Tipo           string        `csv:"tipo" tableheader:"tipo"`
-	Categoria      string        `csv:"categoria" tableheader:"categoria"`
-	Item           string        `csv:"item" tableheader:"item"`
-	Valor          CustomFloat32 `csv:"valor" tableheader:"valor"`
+	IdContracheque     int           `csv:"id_contracheque" tableheader:"id_contracheque"`
+	Orgao              string        `csv:"orgao" tableheader:"orgao"`
+	Mes                int32         `csv:"mes" tableheader:"mes"`
+	Ano                int32         `csv:"ano" tableheader:"ano"`
+	Tipo               string        `csv:"tipo" tableheader:"tipo"`
+	Categoria          string        `csv:"categoria" tableheader:"categoria"`
+	Item               string        `csv:"item" tableheader:"item"`
+	Valor              CustomFloat32 `csv:"valor" tableheader:"valor"`
+	DesambiguacaoMicro string        `csv:"desambiguacao_micro" tableheader:"desambiguacao_micro"`
+	DesambiguacaoMacro string        `csv:"desambiguacao_macro" tableheader:"desambiguacao_macro"`
 }
 
 type CustomFloat32 float32
