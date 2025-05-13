@@ -118,7 +118,10 @@ func TestNewResultadoColetaCSV(t *testing.T) {
 			IndiceTransparencia: 0.8,
 		},
 	}
-	assert.Equal(t, resultadoColeta, NewResultadoColetaCSV_V2(&in))
+
+	result, _ := NewResultadoColetaCSV_V2(&in)
+
+	assert.Equal(t, resultadoColeta, result)
 }
 
 func TestLoad_Success(t *testing.T) {
